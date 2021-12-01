@@ -30,13 +30,14 @@ const ForeignObject = styled.foreignObject`
 const Tooltip = ({ x, y, info, fields }) => (
   <ForeignObject x={x + 10} y={y + 10} width={100} height={50}>
     <div>
-
-    // {console.log("info", info.date)}
-      <strong> {JSON.stringify(info.formatted_date)} <p>{info.entry_word_count}</p>  </strong>
+      // {console.log("info", info.date)}
+      <strong>
+        {" "}
+        {JSON.stringify(info.formatted_date)} <p>{info.entry_word_count}</p>{" "}
+      </strong>
     </div>
   </ForeignObject>
 );
-
 
 // let width = 640 // outer width, in pixels
 // let height = 4000
@@ -59,7 +60,6 @@ const Tooltip = ({ x, y, info, fields }) => (
 // const xScale = xType(xDomain, xRange);
 // const yScale = yType(yDomain, yRange);
 
-
 export default ({
   x,
   y,
@@ -69,15 +69,14 @@ export default ({
   data,
   xDimension,
   yDimension,
-  padding = 20
+  padding = 20,
 }) => {
   const { tooltip, setTooltip } = useContext(tooltipContext);
 
   const xScale = d3
-  .scaleTime()
-  .domain(d3.extent(data, xDimension))
-  .range([0, width-(padding + 10)]);
-
+    .scaleTime()
+    .domain(d3.extent(data, xDimension))
+    .range([0, width - (padding + 10)]);
 
   const yScale = d3
     .scaleLinear()
@@ -85,30 +84,87 @@ export default ({
     .range([height - (padding + 10), padding + 10]);
 
 
+     let minDate = data[0][0] != undefined && data[0][0].quarter
+     let maxDate = data[0][0] != undefined && data[data.length-1][0].quarter
+console.log("MIN MAX", minDate, maxDate)
+
+const xScale1  = d3
+    .scaleTime()
+    // .domain(d3.extent(data, xDimension))
+
+    // .domain([maxDate, minDate])
+    // .range([height - (padding + 10), padding + 10]);
+
+console.log("FINDINGX", x)
 
 
+  const yScale1 = d3.scaleLinear()
+  .domain([0, data.length])
+  .rangeRound([height, 0]);
+
+
+    // .range([0, width])}
+
+    // .domain(d3.extent(yDimension, i))
+
+    // .range([height - (padding + 10), padding + 10]);
 
 
   return (
-    <g transform={`translate(${x}, ${y})`}>
-      {data.map((d) => (
-        <Circle
-          key={d[fields[0]]}
-          cx={xScale(xDimension(d))}
-          cy={yScale(yDimension(d))}
-          r={3}
-          onMouseOver={() => setTooltip(d)}
-          onMouseOut={() => setTooltip(false)}
-        />
-      ))}
+    // Regular scatter, search for unnested
+    // If data is a regular array
+    data[0][0] === undefined ? (
+      <g transform={`translate(${x}, ${y})`}>
+        {data.map((d) => (
+          // console.log(xDimension(d)) &&
+          <Circle
+            key={d[fields[1]]}
+            cx={xScale(xDimension(d))}
+            cy={yScale(yDimension(d))}
+            r={5}
+            onMouseOver={() => setTooltip(d)}
+            onMouseOut={() => setTooltip(false)}
+          />
+        ))}
+        {tooltip && (
+          <Tooltip
+            x={xScale(xDimension(tooltip))}
+            y={()=>yScale(yDimension(tooltip))}
+            info={tooltip}
+          />
+        )}
+      </g>
+    ) : (
+      // If data is nested
 
-      {tooltip && (
-        <Tooltip
-          x={xScale(xDimension(tooltip))}
-          y={yScale(yDimension(tooltip))}
-          info={tooltip}
-        />
-      )}
-    </g>
+      <>
+            <g transform={`translate(${x}, ${y})`}>
+
+        {data.map((d,i) => (
+
+          <g transform={`translate(${i * 35}, ${10})`}>
+          {console.log("Findingi", i)}
+
+            {console.log("FINDING", d)}
+            {d.map((di, i) => (
+              <Circle key={di[fields[1]]} cx={0} cy={-16*i} r={8} />
+
+            ))
+
+            }
+          </g>
+        ))}
+
+{tooltip && (
+          <Tooltip
+            x={xDimension(tooltip)}
+            y={()=>yDimension(tooltip)}
+            info={tooltip}
+          />
+        )}
+              </g>
+
+      </>
+    )
   );
 };

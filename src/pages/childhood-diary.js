@@ -5,37 +5,35 @@ import ScatterPlot from "../components/Scatterplot";
 import { csv } from "d3";
 
 import * as d3 from "d3";
-
+import moment from "moment";
 // markup
 const ChildhoodDiary = () => {
   let path = "/data/rye4_word_analysis.csv";
   const [data, setData] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
-console.log('PAGE')
 
   React.useEffect(() => {
     csv(path).then((d) => {
 
-      d.forEach((i) => {
+      d.forEach((i, index) => {
 
-        let quarter = Math.ceil(new Date(i.formatted_date).getMonth() / 3);
-        let year = new Date(i.formatted_date).getMonth();
+        // let quarter = Math.ceil(new Date(i.formatted_date).getMonth() / 3);
+        let quarter = moment(new Date(i.formatted_date)).quarter(moment().quarter()).startOf('quarter');
+
+        let month = new Date(i.formatted_date).getMonth();
+        let year = new Date(i.formatted_date).getFullYear()
+
 
 
         i.date =  i.date ;
-        i.formatted_date =  i.formatted_date;
+        i.month = month
+        i.year = year
+        i.quarter = quarter
+        i.index=index
+        i.radius=20;
 
     });
 
-      // let newData=[]s
-      // for(const value of d) {
-      //   newData.push({
-      //     label: value.label,
-      //     value: value.value,
-      //     tooltipContent: `<b>x: </b>${value.label}<br><b>y: </b>${value.value}`,
-      //   })
-      // }
-      // setData(newData);
       setData(d)
       setLoading(false);
     });
