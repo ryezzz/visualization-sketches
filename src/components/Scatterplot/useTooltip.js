@@ -5,7 +5,16 @@ const tooltipContext = React.createContext();
 function useTooltip() {
   const [tooltip, setTooltip] = useState(false);
 
+
   return { tooltip, setTooltip };
 }
 
-export { useTooltip, tooltipContext };
+
+
+const useDifferentTooltip=()=> {
+  const [tooltip, setTooltip] = useState(false);
+
+  return { tooltip, setTooltip };
+}
+
+export { useTooltip, tooltipContext, useDifferentTooltip };
