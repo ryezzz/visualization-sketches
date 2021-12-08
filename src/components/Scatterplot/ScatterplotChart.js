@@ -1,9 +1,18 @@
+// Potential directions: canvas/veroni
+// https://observablehq.com/@d3/voronoi-labels
+// https://observablehq.com/@didoesdigital/9-may-2020-d3-scatterplot-with-voronoi-tooltips
+// d3 canvas react https://medium.com/@louisemoxy/my-canvas-d3-and-react-setup-1a325bd4fde5
+
+// Create canvas demo and re-create scatter https://codesandbox.io/s/naughty-worker-sj0iw?from-embed=&file=/src/interval.js:264-284
+
 import React, { useState, useContext, useRef } from "react";
 import * as d3 from "d3";
 import styled from "styled-components";
 
 import { tooltipContext } from "./useTooltip";
-import { date } from "faker";
+// import { Stage, Layer, Circle } from "react-konva";
+
+
 
 const Circle = styled.circle`
   fill: #eb344f;
@@ -60,6 +69,12 @@ export default ({
   yDimension,
   padding = 20,
 }) => {
+
+const svgRef = React.useRef(null);
+const layerRef = React.useRef(null);
+const xAxisRef = React.useRef(null);
+const yAxisRef = React.useRef(null);
+
   const [newTooltip, setNewTooltip] = useState("BLAH");
 
   const { tooltip, setTooltip } = useContext(tooltipContext);

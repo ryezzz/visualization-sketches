@@ -7,8 +7,12 @@ import * as d3 from "d3";
 import ScatterplotChart from "./ScatterplotChart";
 import { useTooltip, tooltipContext } from "./useTooltip";
 import "./styles.css";
+// import { Stage, Layer, Circle } from "react-konva";
 
 const Scatterplot = (props) => {
+
+
+
   let width = 640;
   let height = 400;
   let xType = d3.scaleLinear().range([height, 0]); // type of x-scale
