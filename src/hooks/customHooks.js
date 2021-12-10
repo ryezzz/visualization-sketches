@@ -1,24 +1,25 @@
-import { useEffect, useState } from "react";
-import ResizeObserver from "resize-observer-polyfill";
-import {
-  csv, setData
-} from "d3";
+import React, { useState, useEffect, useRef } from "react";
 
-export const useResizeObserver = (ref) => {
-return{
-  "x": 0,
-  "y": 0,
-  "width": window.innerWidth,
-  "height": window.innerHeight,
-  "top": 0,
-  "right": 0,
-  "bottom": 0,
-  "left": 0
-}
-}
 
-export const importCSVData = (path) => {
-  csv(path).then((d) => {
-    return(d)
-  });
+export function GetScroll() {
+  const prevScrollY = useRef(0)
+  const [goingUp, setGoingUp] = useState(false);
+
+  const handleScroll = () => {
+
+    const currentScrollY = window.scrollY;
+    if (prevScrollY.current < currentScrollY && goingUp) {
+      setGoingUp(false);
+    }
+    if (prevScrollY.current > currentScrollY && !goingUp) {
+      setGoingUp(true);
+    }
+    prevScrollY.current = currentScrollY;
+  };
+
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll());
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [goingUp]);
+  return goingUp ? 'up' : 'down';
 }
