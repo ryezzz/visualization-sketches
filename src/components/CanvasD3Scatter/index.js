@@ -2,40 +2,34 @@
 import { useEffect, useRef } from "react";
 import { Delaunay } from "d3-delaunay";
 import * as d3 from "d3";
-import { useScrollData } from "scroll-data-hook";
 import React, { useState } from "react";
+import { easeCubic } from "d3-ease";
+
 
 const pixelRatio = window.devicePixelRatio;
 
 const Veroni = (props) => {
-
   let height = props.height;
-
   let width = props.width;
-
   let particles = props.particles;
-
   let ref = useRef();
-
+  let prevDataRef = useRef();
   let xScale = d3
     .scaleLinear()
     .domain(d3.extent(particles, (d) => d[props.dateSelection]))
     .range([0, width])
     .nice();
-
-    let yScale = d3
+  let yScale = d3
     .scaleTime()
     .domain(d3.extent(particles, (d) => d[props.valueSelection]))
     .range([height, 0])
     .nice();
-
   const delaunay = Delaunay.from(
     particles.map((d) => [
       xScale(d[props.dateSelection]),
       yScale(d[props.valueSelection]),
     ])
   );
-
   const tooltip = d3
     .select("body")
     .append("div")
@@ -67,53 +61,59 @@ const Veroni = (props) => {
     tooltip.style("opacity", 0).style("z-index", -1);
   }
 
+  function usePrevious(value) {
+    const ref = useRef("year");
+    useEffect(() => {
+      ref.current = value;
+    });
+    return ref.current;
+  }
 
-
-
+  let prevDate = usePrevious(props.dateSelection);
 
   useEffect(() => {
     const canvas = ref.current;
-    const context = canvas.getContext("2d", { alpha: true })
+    const context = canvas.getContext("2d", { alpha: true });
     const pixelRatioinner = window.devicePixelRatio;
     context.scale(pixelRatioinner, pixelRatioinner);
     context.setTransform(pixelRatioinner, 0, 0, pixelRatioinner, 0, 0);
+
     const update = (hoverActive = false, column = 1) => {
-      let hsla = props.hsla;
-      let voronoi = delaunay.voronoi([0, 0, width - 0, height - 0]);
+      console.log("DATE SELECTION", props.dateSelection)
+      // let hsla = props.hsla;
+      // let voronoi = delaunay.voronoi([0, 0, width - 0, height - 0]);
       context.clearRect(0, 0, width, height);
-      context.beginPath();
-      delaunay.render(context);
-      context.strokeStyle = hsla;
-      context.lineWidth = 2;
-      context.lineWidth = 0;
-      context.lineCap = "round";
-      particles.map((d) => {
-        context.beginPath();
-        context.arc(
-          xScale(d[props.dateSelection]),
-          yScale(d[props.valueSelection]),
-          5,
-          0,
-          2 * Math.PI
-        );
-      });
+      // delaunay.render(context);
+      // context.strokeStyle = hsla;
+      // context.lineWidth = 2;
+      // context.lineWidth = 0;
+      // context.lineCap = "round";
+      // context.beginPath();
+
+      // particles.map((d) => {
+      //   context.beginPath();
+      //   context.arc(
+      //     xScale(d[props.dateSelection]),
+      //     yScale(d[props.valueSelection]),
+      //     5,
+      //     0,
+      //     2 * Math.PI
+      //   );
+      // });
+
       hoverActive && context.beginPath();
       let radius = 10;
       hoverActive &&
         context.arc(
-          xScale(hoverActive[props.dateSelection]),
+         xScale(hoverActive[props.dateSelection]),
           yScale(hoverActive[props.valueSelection]),
           radius,
           0,
           2 * Math.PI
         );
       hoverActive && context.fill();
-      voronoi.render(context);
-      voronoi.renderBounds(context, 2);
-      // context.stroke();
-      context.rotate((3 * Math.PI) / 180);
-
-      context.strokeStyle = hsla;
+      // voronoi.renderBounds(context, 2);
+      // context.strokeStyle = hsla;
       context.beginPath();
       delaunay.renderPoints(context);
       context.fill();
