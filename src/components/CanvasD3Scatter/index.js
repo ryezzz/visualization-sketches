@@ -5,7 +5,6 @@ import * as d3 from "d3";
 import React, { useState } from "react";
 import { easeCubic } from "d3-ease";
 
-
 const pixelRatio = window.devicePixelRatio;
 
 const Veroni = (props) => {
@@ -14,22 +13,26 @@ const Veroni = (props) => {
   let particles = props.particles;
   let ref = useRef();
   let prevDataRef = useRef();
+
   let xScale = d3
     .scaleLinear()
     .domain(d3.extent(particles, (d) => d[props.dateSelection]))
     .range([0, width])
     .nice();
+
   let yScale = d3
     .scaleTime()
     .domain(d3.extent(particles, (d) => d[props.valueSelection]))
     .range([height, 0])
     .nice();
+
   const delaunay = Delaunay.from(
     particles.map((d) => [
       xScale(d[props.dateSelection]),
       yScale(d[props.valueSelection]),
     ])
   );
+
   const tooltip = d3
     .select("body")
     .append("div")
@@ -72,6 +75,7 @@ const Veroni = (props) => {
   let prevDate = usePrevious(props.dateSelection);
 
   useEffect(() => {
+    console.log("timeframe", props.dateSelection)
     const canvas = ref.current;
     const context = canvas.getContext("2d", { alpha: true });
     const pixelRatioinner = window.devicePixelRatio;
@@ -79,70 +83,54 @@ const Veroni = (props) => {
     context.setTransform(pixelRatioinner, 0, 0, pixelRatioinner, 0, 0);
 
     const update = (hoverActive = false, column = 1) => {
-      console.log("DATE SELECTION", props.dateSelection)
-      // let hsla = props.hsla;
-      // let voronoi = delaunay.voronoi([0, 0, width - 0, height - 0]);
+      console.log("DATE SELECTION", props.dateSelection);
       context.clearRect(0, 0, width, height);
-      // delaunay.render(context);
-      // context.strokeStyle = hsla;
-      // context.lineWidth = 2;
-      // context.lineWidth = 0;
-      // context.lineCap = "round";
-      // context.beginPath();
+      hoverActive && context.beginPath();
 
-      // particles.map((d) => {
-      //   context.beginPath();
+
+      //Mouse Events
+      // let radius = 10;
+
+      // hoverActive &&
       //   context.arc(
-      //     xScale(d[props.dateSelection]),
-      //     yScale(d[props.valueSelection]),
-      //     5,
+      //     xScale(hoverActive[props.dateSelection]),
+      //     yScale(hoverActive[props.valueSelection]),
+      //     radius,
       //     0,
       //     2 * Math.PI
       //   );
-      // });
-
-      hoverActive && context.beginPath();
-      let radius = 10;
-      hoverActive &&
-        context.arc(
-         xScale(hoverActive[props.dateSelection]),
-          yScale(hoverActive[props.valueSelection]),
-          radius,
-          0,
-          2 * Math.PI
-        );
-      hoverActive && context.fill();
-      // voronoi.renderBounds(context, 2);
-      // context.strokeStyle = hsla;
-      context.beginPath();
-      delaunay.renderPoints(context);
-      context.fill();
+      // hoverActive && context.fill();
+      // context.beginPath();
+      // delaunay.renderPoints(context);
+      // context.fill();
     };
 
-    onmousemove = (event) => {
-      event.preventDefault();
-      let mousePoint = d3.pointer(event, this);
-      let x = mousePoint[0];
-      let y = mousePoint[1];
-      let heightCond = y < height && x < width;
-      let index = delaunay.find(x, y);
-      let tooltipX = particles[index][props.dateSelection];
-      let tooltipY = particles[index][props.valueSelection];
-      let tooltipZ = particles[index][props.valueSelection];
 
-      heightCond
-        ? showTooltip(
-            event,
-            tooltipX,
-            tooltipY,
-            tooltipZ,
-            xScale(tooltipX),
-            yScale(tooltipY)
-          )
-        : hideTooltip();
-      heightCond && update(particles[index]);
-      context.restore();
-    };
+    //   //Mouse Events
+    // onmousemove = (event) => {
+    //   event.preventDefault();
+    //   let mousePoint = d3.pointer(event, this);
+    //   let x = mousePoint[0];
+    //   let y = mousePoint[1];
+    //   let heightCond = y < height && x < width;
+    //   let index = delaunay.find(x, y);
+    //   let tooltipX = particles[index][props.dateSelection];
+    //   let tooltipY = particles[index][props.valueSelection];
+    //   let tooltipZ = particles[index][props.valueSelection];
+
+    //   heightCond
+    //     ? showTooltip(
+    //         event,
+    //         tooltipX,
+    //         tooltipY,
+    //         tooltipZ,
+    //         xScale(tooltipX),
+    //         yScale(tooltipY)
+    //       )
+    //     : hideTooltip();
+    //   heightCond && update(particles[index]);
+    //   context.restore();
+    // };
 
     update();
     context.restore();
