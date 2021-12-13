@@ -2,20 +2,18 @@
 import { useEffect, useRef } from "react";
 import { Delaunay } from "d3-delaunay";
 import * as d3 from "d3";
-import { useScrollData } from "scroll-data-hook";
 import React, { useState } from "react";
+import { easeCubicInOut } from "d3-ease";
+import { gsap } from "gsap";
 
 const pixelRatio = window.devicePixelRatio;
 
 const Veroni = (props) => {
-
   let height = props.height;
-
   let width = props.width;
-
   let particles = props.particles;
-
   let ref = useRef();
+  let prevDataRef = useRef();
 
   let xScale = d3
     .scaleLinear()
@@ -23,18 +21,11 @@ const Veroni = (props) => {
     .range([0, width])
     .nice();
 
-    let yScale = d3
+  let yScale = d3
     .scaleTime()
     .domain(d3.extent(particles, (d) => d[props.valueSelection]))
     .range([height, 0])
     .nice();
-
-  const delaunay = Delaunay.from(
-    particles.map((d) => [
-      xScale(d[props.dateSelection]),
-      yScale(d[props.valueSelection]),
-    ])
-  );
 
   const tooltip = d3
     .select("body")
@@ -50,82 +41,142 @@ const Veroni = (props) => {
     .style("padding", "10px")
     .style("position", "absolute")
     .style("pointer-events", "none")
-    .style("z-index", 100);
+    .style("z-index", 100)
+    .style("max-width", "200px");
 
   function showTooltip(event, tooltipX, tooltipY, tooltipZ, xScalei, yScalei) {
     tooltip
       .style("opacity", 0.8)
-      .style("top", yScalei + "px")
+      .style("top", yScalei + window.pageYOffset + 10 + "px")
       .style("left", xScalei + 10 + "px")
       .style("z-index", 1)
       .html(
-        `<div>${tooltipX}</div> <div>${tooltipY}</div> <div>${tooltipZ}</div>`
+        `<div>word_count: <b>${tooltipY}</b></div><div>${props.dateSelection}: <b>${tooltipX}</b></div>  <div></div>`
       );
   }
 
   function hideTooltip() {
-    tooltip.style("opacity", 0).style("z-index", -1);
+    tooltip.style("opacity", 0).style("z-index", -100);
   }
 
+  const usePrevious = (value) => {
+    const ref = useRef("year");
+    useEffect(() => {
+      ref.current = value;
+    });
+    return ref.current;
+  };
 
+  let prevDate = usePrevious(props.dateSelection);
 
+  const delaunay = (dateString, x, y) =>
+    Delaunay.from(
+      particles.map((d, i) => [
+        xScale(d[props.dateSelection]),
+        yScale(d[props.valueSelection]),
+      ])
+    );
 
+  // let fakeArr = [1, 2, 3];
+  // let gsapTest =
+  //   // particles.map((d,i) => {
+  //   gsap.to(fakeArr, {
+  //     duration: 1,
+  //     ease: 5,
+  //     delay: 0.06,
+  //   });
+  // // })
+  const destinationParticles = [];
+  const originParticles = [];
+
+  const mappedParicles = () =>
+    particles.map((d) => {
+      destinationParticles.push({
+        x: xScale(d[props.dateSelection]),
+        y: yScale(d[props.valueSelection]),
+      });
+      originParticles.push({
+        x: xScale(d[prevDate]),
+        y: yScale(d[props.valueSelection]),
+      });
+    });
+
+  mappedParicles();
 
   useEffect(() => {
+    // SCALE CANVAS
     const canvas = ref.current;
-    const context = canvas.getContext("2d", { alpha: true })
+    const context = canvas.getContext("2d", { alpha: true });
     const pixelRatioinner = window.devicePixelRatio;
+    const hoverRadius = 10;
+    const radius = 4;
+
     context.scale(pixelRatioinner, pixelRatioinner);
     context.setTransform(pixelRatioinner, 0, 0, pixelRatioinner, 0, 0);
+    // END SCALE CANVAS
+
     const update = (hoverActive = false, column = 1) => {
-      let hsla = props.hsla;
-      let voronoi = delaunay.voronoi([0, 0, width - 0, height - 0]);
+      console.log("updated");
       context.clearRect(0, 0, width, height);
       context.beginPath();
-      delaunay.render(context);
-      context.strokeStyle = hsla;
-      context.lineWidth = 2;
-      context.lineWidth = 0;
-      context.lineCap = "round";
-      particles.map((d) => {
-        context.beginPath();
-        context.arc(
-          xScale(d[props.dateSelection]),
-          yScale(d[props.valueSelection]),
-          5,
-          0,
-          2 * Math.PI
-        );
-      });
+      delaunay(props.dateSelection).renderPoints(context, radius);
+      context.fill();
+
+      console.log("MAPPED PARTICLES", delaunay(props.dateSelection), originParticles, destinationParticles)
+
+      // let gsapTest = gsap.to(originParticles, {
+      //   x: (index, target, targets) => destinationParticles[index].x,
+      //   y: (index, target, targets) => destinationParticles[index].y,
+      //   duration: 0.5,
+      //   ease: 'power.3.out',
+      //   stagger: { amount: 10 },
+      //   onUpdate: animate
+      // });
+
+      // console.log("GSAP TEST", gsapTest, delaunay(prevDate)._delaunator);
+
+      // function animate() {
+
+      //   for (const [_cx, _cy ] of delaunay(prevDate)._delaunator) {
+      //     context.beginPath()
+      //     context.arc(
+      //       _cx,
+      //       _cy,
+      //       hoverRadius,
+      //       0,
+      //       2 * Math.PI
+      //     );
+      //     context.fill()
+
+      //   }
+      // }
+
+      // console.log(context);
+
       hoverActive && context.beginPath();
-      let radius = 10;
       hoverActive &&
         context.arc(
           xScale(hoverActive[props.dateSelection]),
           yScale(hoverActive[props.valueSelection]),
-          radius,
+          hoverRadius,
           0,
           2 * Math.PI
         );
       hoverActive && context.fill();
-      voronoi.render(context);
-      voronoi.renderBounds(context, 2);
-      // context.stroke();
-      context.rotate((3 * Math.PI) / 180);
-
-      context.strokeStyle = hsla;
-      context.beginPath();
-      delaunay.renderPoints(context);
-      context.fill();
     };
 
+    onscroll = (event) => {
+      hideTooltip();
+    };
     onmousemove = (event) => {
       event.preventDefault();
+      hideTooltip();
+
       let mousePoint = d3.pointer(event, this);
       let x = mousePoint[0];
-      let y = mousePoint[1];
-      let heightCond = y < height && x < width;
-      let index = delaunay.find(x, y);
+      let y = mousePoint[1] - window.pageYOffset;
+      let heightCond = x < width;
+      let index = delaunay(props.dateSelection).find(x, y);
       let tooltipX = particles[index][props.dateSelection];
       let tooltipY = particles[index][props.valueSelection];
       let tooltipZ = particles[index][props.valueSelection];
@@ -145,15 +196,12 @@ const Veroni = (props) => {
     };
 
     update();
-    context.restore();
   }, [props.dateSelection]);
 
   return (
     <canvas
       style={{
         backgroundColor: "white",
-        position: "fixed",
-        zIndex: 10000,
         width: props.width + "px",
         height: props.height + "px",
       }}
@@ -188,3 +236,4 @@ const VeroniBackground = (props) => {
 };
 
 export default VeroniBackground;
+
