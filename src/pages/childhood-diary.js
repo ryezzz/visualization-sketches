@@ -1,46 +1,64 @@
 import React, { useState } from "react";
-// import BarChart from "../components/BarChart";
-// A demo with everything I want except react https://observablehq.com/@spattana/interaction-in-d3-canvas-based-scatter-plots
-import ScatterPlot from "../components/Scatterplot";
-import BeeSwarm from "../components/BeeSwarm";
-// import BeeSwarm from "../components/BeeSwarm";
-// import CanvasDemo from "../components/CanvasDemo";
 import CanvasD3Scatter from "../components/CanvasD3Scatter";
 import { useScrollData } from "scroll-data-hook";
 import { csv } from "d3";
-import moment from "moment";
 import { Scrollama, Step } from "react-scrollama";
 
+
+
 const scatterScrollingtext = (scrollLocation) => {
-  if ((scrollLocation === 2)) {
+  if (scrollLocation === 2) {
     return {
-      title:  <>Diary Entries by <b>week</b></>,
+      title: (
+        <>
+          Diary Entries by <b>week</b>
+        </>
+      ),
       date_selection: "week",
     };
   }
 
-  if ((scrollLocation === 1)) {
+  if (scrollLocation === 1) {
     return {
-      title: <>Diary Entries by <b>month</b></>,
+      title: (
+        <>
+          Diary Entries by <b>month</b>
+        </>
+      ),
       date_selection: "month",
     };
   }
 
-  if ((scrollLocation === 0)) {
+  if (scrollLocation === 0) {
     return {
-      title:  <>Diary Entries by <b>year</b></>,
-      date_selection: "year"
+      title: (
+        <>
+          Diary Entries by <b>year</b>
+        </>
+      ),
+      date_selection: "year",
     };
   }
 
   return {
-    title: "",
-    date_selection: "",
+    title: (
+      <>
+        Diary Entries by <b>year</b>
+      </>
+    ),
+    date_selection: "year",
   };
 };
 
+
 const ChildhoodDiary = () => {
+  const checkForUndefined=(windowsize)=> windowsize === undefined ? 1000 : windowsize
+
   const [currentStepIndex, setCurrentStepIndex] = useState(null);
+  const [currentWidth, setCurrentWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 1000);
+  const [currentHeight, setCurrentHeight] = useState(typeof window !== "undefined" ? window.innerHeight: 1000);
+
+
 
   const onStepEnter = ({ data }) => {
     setCurrentStepIndex(data);
@@ -62,14 +80,14 @@ const ChildhoodDiary = () => {
         i.id = idGen;
         i.date = i.date;
         i.formatted_date = new Date(i.formatted_date);
-        i.month = new Date(i.formatted_date).getMonth()
-        i.year = new Date(i.formatted_date).getFullYear()
+        i.month = new Date(i.formatted_date).getMonth();
+        i.year = new Date(i.formatted_date).getFullYear();
         i.quarter = quarter;
         i.index = index;
-        i.week = new Date(i.formatted_date).getDay()
+        i.week = new Date(i.formatted_date).getDay();
         i.radius = 20;
         i.particles = particles;
-        i.formatted_date = new Date(i.formatted_date)
+        i.formatted_date = new Date(i.formatted_date);
       });
       setData(d);
       setParticles(particlesArr);
@@ -78,79 +96,55 @@ const ChildhoodDiary = () => {
     return () => undefined;
   }, []);
 
-  const pixelRatio = window.devicePixelRatio;
+  React.useEffect(() => {
+
+    if( typeof window !== "undefined" ) {
+
+    window.onresize = function(event) {
+    setCurrentWidth(checkForUndefined(window.innerWidth))
+    setCurrentHeight(checkForUndefined(window.innerHeight))
+    }
+  };
+  return () => undefined;
+  }, []);
+
+
   return (
     <>
       {!loading && (
         <div>
-          <div
-            style={{ position: "sticky", top:0, width: "50%", float:"left"}}>
-            <CanvasD3Scatter
-              height={window.innerHeight * .9}
-              width={window.innerWidth/2}
-              particles={data}
-              useScrollData={useScrollData}
-              hsla={"hsla(0, 100%, 65%, 1)"}
-              pixelRatio={pixelRatio}
-              dateSelection={scatterScrollingtext(currentStepIndex).date_selection}
-              valueSelection="entry_word_count"
-              stepIndex = {currentStepIndex}
-              margin = {10}
-            />
+          <CanvasD3Scatter
+            className={"staticGraphicContainer"}
+            height={currentHeight * 0.95}
+            width={currentWidth * 0.6}
+            particles={data}
+            useScrollData={useScrollData}
+            hsla={"hsla(0, 100%, 65%, 1)"}
+            dateSelection={
+              scatterScrollingtext(currentStepIndex).date_selection
+            }
+            valueSelection="entry_word_count"
+            stepIndex={currentStepIndex}
+            margin={10}
+            marginLeft={currentWidth * 0.1}
+            marginTop={currentWidth * 0.3}
+          />
+
+          <div className="scrollingTextContainer darkModeScrollingTitle">
+            <Scrollama className="" offset={0.5} onStepEnter={onStepEnter}>
+              {[0, 1, 2, 3].map((_, stepIndex) => (
+                <Step data={stepIndex} key={stepIndex}>
+                  <div class="textStep">
+                    {scatterScrollingtext(stepIndex).title}
+                  </div>
+                </Step>
+              ))}
+            </Scrollama>
           </div>
-
-
-
-          <div className="darkModeScrollingTitle" style={{marginTop:-600}}>
-          <Scrollama  offset={.5} onStepEnter={onStepEnter}>
-            {[0, 1, 2, 3].map((_, stepIndex) => (
-              <Step data={stepIndex} key={stepIndex}>
-                <div
-                  style={{
-                    position: "sticky",
-                    zIndex: 0,
-                    left: "70%",
-                    fontSize: "50px",
-                    maxWidth: "25%",
-                    minHeight: "100px",
-                    marginTop: "30vh",
-                    marginBottom: "50px",
-                    opacity: currentStepIndex === stepIndex ? 1 : .2,
-                    transitionProperty: "opacity",
-                    transitionDuration: ".5s",
-                  }}
-                >
-                  {scatterScrollingtext(stepIndex).title}
-                </div>
-              </Step>
-            ))}
-          </Scrollama>
-          </div>
-
-
-
-          {/* <BeeSwarm
-            height={500}
-            width={window.innerWidth}
-            particles={particles}
-            hsla={"hsla(238, 83%, 35%, .5)"}
-          /> */}
-
-          {/* <ScatterPlot data={data}></ScatterPlot> */}
-
         </div>
       )}
-
-{/* {JSON.stringify(data)} */}
-
     </>
   );
 };
 
 export default ChildhoodDiary;
-
-// let height = props.height;
-// let width = props.width;
-// let stroke = 5;
-// let particles = props.particles;
-// let ref = useRef();

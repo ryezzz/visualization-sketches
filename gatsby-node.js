@@ -15,7 +15,7 @@ exports.onCreateWebpackConfig = ({
     }
   });
 
-  if (stage === "develop-html") {
+  if (stage === "develop-html" ||stage === "build-html") {
     actions.setWebpackConfig({
       module: {
         rules: [
