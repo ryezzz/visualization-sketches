@@ -10,7 +10,7 @@
   "scripts": {
     "develop": "kill -9 $(lsof -i:8000 -t) | gatsby develop",
     "start": "kill -9 $(lsof -i:8000 -t) | gatsby develop",
-    "build": "gatsby build",
+    "deploy": "gatsby build --prefix-paths && gh-pages -d public",
     "serve": "gatsby serve",
     "clean": "gatsby clean"
   },
@@ -27,6 +27,7 @@
     "gatsby-plugin-mdx": "^3.2.0",
     "gatsby-plugin-sass": "^5.2.0",
     "gatsby-source-filesystem": "^4.2.0",
+    "gh-pages": "^3.2.3",
     "gsap": "^3.8.0",
     "konva": "^8.3.0",
     "moment": "^2.29.1",
