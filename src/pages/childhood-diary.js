@@ -12,31 +12,24 @@ import moment from "moment";
 import { Scrollama, Step } from "react-scrollama";
 
 const scatterScrollingtext = (scrollLocation) => {
-  if ((scrollLocation === 3)) {
-    return {
-      title:  <>Diary Entries by <b>year</b></>,
-      date_selection: "year",
-    };
-  }
-
   if ((scrollLocation === 2)) {
     return {
-      title:  <>Diary Entries by <b>month</b></>,
-      date_selection: "month",
+      title:  <>Diary Entries by <b>week</b></>,
+      date_selection: "week",
     };
   }
 
   if ((scrollLocation === 1)) {
     return {
-      title: <>Diary Entries by <b>quarter</b></>,
-      date_selection: "quarter",
+      title: <>Diary Entries by <b>month</b></>,
+      date_selection: "month",
     };
   }
 
   if ((scrollLocation === 0)) {
     return {
-      title:  <>Diary Entries by <b>date</b></>,
-      date_selection: "formatted_date",
+      title:  <>Diary Entries by <b>year</b></>,
+      date_selection: "year"
     };
   }
 
@@ -63,18 +56,17 @@ const ChildhoodDiary = () => {
     csv(path).then((d) => {
       d.forEach((i, index) => {
         let idGen = "i" + Math.random().toString(16).slice(-4) + "d";
-        let quarter = moment(new Date(i.formatted_date))
-          .quarter(moment().quarter())
-          .startOf("quarter");
-        let month = new Date(i.formatted_date).getMonth();
+        let quarter = new Date(i.formatted_date).getFullYear();
         let year = new Date(i.formatted_date).getFullYear();
-        particlesArr.push([year, i.entry_word_count, i.formatted_date]);
+
         i.id = idGen;
         i.date = i.date;
-        i.month = month;
-        i.year = year;
+        i.formatted_date = new Date(i.formatted_date);
+        i.month = new Date(i.formatted_date).getMonth()
+        i.year = new Date(i.formatted_date).getFullYear()
         i.quarter = quarter;
         i.index = index;
+        i.week = new Date(i.formatted_date).getDay()
         i.radius = 20;
         i.particles = particles;
         i.formatted_date = new Date(i.formatted_date)
@@ -87,7 +79,6 @@ const ChildhoodDiary = () => {
   }, []);
 
   const pixelRatio = window.devicePixelRatio;
-  const stepCheck = scatterScrollingtext(currentStepIndex).date_selection
   return (
     <>
       {!loading && (
@@ -95,7 +86,6 @@ const ChildhoodDiary = () => {
           <div
             style={{ position: "sticky", top:0, width: "50%", float:"left"}}>
             <CanvasD3Scatter
-
               height={window.innerHeight * .9}
               width={window.innerWidth/2}
               particles={data}
@@ -105,14 +95,15 @@ const ChildhoodDiary = () => {
               dateSelection={scatterScrollingtext(currentStepIndex).date_selection}
               valueSelection="entry_word_count"
               stepIndex = {currentStepIndex}
+              margin = {10}
             />
           </div>
 
 
 
-          <div style={{marginTop:-600}}>
+          <div className="darkModeScrollingTitle" style={{marginTop:-600}}>
           <Scrollama  offset={.5} onStepEnter={onStepEnter}>
-            {[0, 1, 2, 3, 4].map((_, stepIndex) => (
+            {[0, 1, 2, 3].map((_, stepIndex) => (
               <Step data={stepIndex} key={stepIndex}>
                 <div
                   style={{
@@ -123,11 +114,10 @@ const ChildhoodDiary = () => {
                     maxWidth: "25%",
                     minHeight: "100px",
                     marginTop: "30vh",
-
+                    marginBottom: "50px",
                     opacity: currentStepIndex === stepIndex ? 1 : .2,
                     transitionProperty: "opacity",
                     transitionDuration: ".5s",
-
                   }}
                 >
                   {scatterScrollingtext(stepIndex).title}
