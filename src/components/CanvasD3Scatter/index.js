@@ -10,25 +10,27 @@ import { FastLayer } from "react-konva";
 import { Axis, axisPropsFromTickScale, LEFT } from "react-d3-axis";
 import { date } from "faker/lib/locales/vi";
 
-const pixelRatio = window.devicePixelRatio;
+const checkForUndefined=(windowsize, defaultValue)=> windowsize === undefined ? defaultValue : windowsize
+export const isBrowser = () => typeof window !== "undefined"
+
+
+const pixelRatio = typeof window !== "undefined" ? window.devicePixelRatio : 1;
+
 
 const Veroni = (props) => {
-  const [currentSelectedPoint, setCurrentSelectedPoint] = useState({});
   const destinationParticles = [];
   const originParticles = [];
   let height = props.height;
   let width = props.width;
   let margin = props.margin;
-  let marginLeft = props.margin + 40;
-  let marginTop = props.margin + 300;
+  let marginLeft = props.marginLeft;
+  let marginTop = props.marginTop;
   let particles = props.particles;
   let ref = useRef();
   let pointRef = useRef();
   let highlightRef = useRef();
   let axisRef = useRef();
   const radius = 8;
-
-  console.log("pointRef", pointRef.current, currentSelectedPoint);
 
   const usePrevious = (value, defaultRef) => {
     const ref = useRef(defaultRef);
@@ -75,8 +77,7 @@ const Veroni = (props) => {
     });
 
   const tooltip = d3
-    .select("body")
-    .append("div")
+    .select("#tooltipDiv")
     .style("background-color", "white")
     .style("border", "1px solid")
     .style("border-radius", "2px")
@@ -85,19 +86,16 @@ const Veroni = (props) => {
       "0 3px 6px rgba(0, 0, 0, 0.3), 0 3px 6px rgba(0, 0, 0, 0.4)"
     )
     .style("opacity", 1)
-    .style("padding", "10px")
-    .style("position", "absolute")
-    .style("pointer-events", "none")
-    .style("z-index", 100)
-    .style("max-width", "200px");
+    .style("padding", "10px");
 
-  function showTooltip(event, tooltipX, tooltipY, tooltipZ, xScalei, yScalei) {
-    console.log(tooltipX, "tooltipx");
+  function showTooltip(tooltipX, tooltipY, tooltipZ, xScalei, yScalei) {
     tooltip
       .style("opacity", 0.7)
-      .style("top", yScalei + window.pageYOffset + "px")
+      .style("display", "block")
+
+      .style("top", yScalei + "px")
       .style("left", xScalei + 15 + "px")
-      .style("z-index", 1)
+      .style("z-index", 5)
       .html(
         `<div>word_count: <b>${tooltipY}</b></div><div>${props.dateSelection}: <b>${tooltipX}</b></div>  <div></div>`
       );
@@ -127,17 +125,13 @@ const Veroni = (props) => {
   d3.select(axisRef.current).call(xAxis);
 
   animatedParticles();
-  const prevPoint = usePrevious(currentSelectedPoint, {});
-  console.log(prevPoint, currentSelectedPoint);
 
   useEffect(() => {
     // SCALE CANVAS
     const canvas = ref.current;
     const context = canvas.getContext("2d");
-    const pixelRatioinner = window.devicePixelRatio;
-    const hoverRadius = 12;
-    context.scale(pixelRatioinner, pixelRatioinner);
-    context.setTransform(pixelRatioinner, 0, 0, pixelRatioinner, 0, 0);
+    context.scale(pixelRatio, pixelRatio);
+    context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
     context.globalAlpha = 0.5;
     // END SCALE CANVAS
 
@@ -165,14 +159,7 @@ const Veroni = (props) => {
       function animate() {
         context.clearRect(0, 0, width, height);
         context.beginPath();
-
         context.fillStyle = "rgb(226, 99, 255)";
-        // Delaunay.from(originParticles.map((d, i) => [d.x, d.y], )).renderPoints(
-        //   context,
-        //   5,
-        //   context.fillStyle = 'rgba(85, 0, 255,.5)',
-        // );
-        // context.fill()
         originParticles.map(
           (d, i) => (
             context.beginPath(),
@@ -180,21 +167,6 @@ const Veroni = (props) => {
             context.fill()
           )
         );
-
-        hoverActive && context.beginPath();
-
-        hoverActive &&
-          context.arc(
-            xScale(hoverActive[props.dateSelection], props.dateSelection)(
-              hoverActive[props.dateSelection],
-              props.dateSelection
-            ),
-            yScale(hoverActive[props.valueSelection]),
-            hoverRadius,
-            0,
-            2 * Math.PI
-          );
-        hoverActive && context.fill();
       }
     };
 
@@ -216,7 +188,8 @@ const Veroni = (props) => {
         .attr("r", radius)
         .attr("cx", xSelection)
         .attr("cy", ySelection)
-        .attr("fill", "white");
+        .attr("fill", "rgba(255,255,255,.3)")
+        .attr("stroke", "rgba(255,255,255, 1)");
     };
 
     const pointHoverOut = () => {
@@ -224,14 +197,15 @@ const Veroni = (props) => {
     };
 
     function hideTooltip(hoverInactive) {
-      tooltip.style("opacity", 0).style("z-index", -100);
+      tooltip.style("display", "none");
     }
 
     onmousemove = (event) => {
-      event.preventDefault();
+      // event.preventDefault();
+      const pageYoffset = typeof window !== "undefined" ? window.pageYOffset : 0
       let mousePoint = d3.pointer(event, this);
       let x = mousePoint[0];
-      let y = mousePoint[1] - window.pageYOffset;
+      let y = mousePoint[1] - [pageYoffset];
       let heightCond = x < width;
       let index = delaunay(props.dateSelection).find(x, y);
       let indexObj = particles[index];
@@ -241,7 +215,6 @@ const Veroni = (props) => {
 
       heightCond
         ? showTooltip(
-            event,
             tooltipX,
             tooltipY,
             tooltipZ,
@@ -257,30 +230,29 @@ const Veroni = (props) => {
     };
 
     update();
-  }, [props.dateSelection]);
+  }, [props.dateSelection, props.width]);
 
   return (
-    <>
-      <svg
-        width={width}
-        height={height}
-        style={{ position: "absolute", zIndex: 30000 }}
-      >
+    <div className="canvasStickyChartContainer">
 
-<div
-        className={"tooltipClass"}
-        height={height}
-        style={{ position: "absolute", zIndex: 30000 }}
+
+      <div
+        id="tooltipDiv"
+        className="tooltipDiv"
       />
+
+      <svg className="canvasStickyPointHighlight" width={width} height={height}>
         <circle
-          r={radius}
+          r={0}
           className="highlightCircle"
           ref={highlightRef}
         ></circle>
       </svg>
+
       <canvas
+        className={"canvasStickyChart"}
         style={{
-          width: props.width + "px",
+          width: props.width  + "px",
           height: props.height + "px",
         }}
         ref={ref}
@@ -293,11 +265,10 @@ const Veroni = (props) => {
         valueSelection={props.valueSelection}
         margin={props.margin}
       />
-
-      <svg width={width} height={50}>
+      <svg className="canvasStickyChartAxis">
         <g className="darkModeAxis" ref={axisRef}></g>
       </svg>
-    </>
+    </div>
   );
 };
 
