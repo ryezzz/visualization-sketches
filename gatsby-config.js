@@ -1,5 +1,4 @@
 module.exports = {
-  pathPrefix: "/visualization-sketches",
   siteMetadata: {
     siteUrl: "https://www.yourdomain.tld",
     title: "Visualization Sketches",
