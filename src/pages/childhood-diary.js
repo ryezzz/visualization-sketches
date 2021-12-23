@@ -65,7 +65,7 @@ const ChildhoodDiary = ({ data }, props) => {
     setCurrentStepIndex(stepdata.data);
   };
 
-  React.useEffect(() => {
+  React.useMemo(() => {
     const diaryFormattedData = [];
     diaryRawData.forEach((d) => {
       let dObject = {
@@ -97,8 +97,7 @@ const ChildhoodDiary = ({ data }, props) => {
 
   return (
     <>
-    {JSON.stringify(data)}
-   { formattedData &&  (<div>
+  <div>
       <CanvasD3Scatter
         className={"staticGraphicContainer"}
         height={currentHeight * 0.95}
@@ -126,7 +125,7 @@ const ChildhoodDiary = ({ data }, props) => {
         </Scrollama>
       </div>
     </div>
-    )}
+    )
     </>
     )
 
