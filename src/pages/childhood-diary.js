@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import CanvasD3Scatter from "../components/CanvasD3Scatter";
 import { useScrollData } from "scroll-data-hook";
-import { csv } from "d3";
 import { Scrollama, Step } from "react-scrollama";
 import { graphql } from "gatsby";
+import { json } from "d3";
 
 const scatterScrollingtext = (scrollLocation) => {
   console.log(scrollLocation)
@@ -50,7 +50,8 @@ const scatterScrollingtext = (scrollLocation) => {
   };
 };
 
-const ChildhoodDiary = ({ data }) => {
+const ChildhoodDiary = ({ data }, props) => {
+  console.log("PROPS", props)
   const diaryRawData = data.allDataCsv.edges[0].node.items;
   const [formattedData, setFormattedData] = useState(null);
   const [currentStepIndex, setCurrentStepIndex] = useState(null);
@@ -66,7 +67,6 @@ const ChildhoodDiary = ({ data }) => {
 
   React.useEffect(() => {
     const diaryFormattedData = [];
-
     diaryRawData.forEach((d) => {
       let dObject = {
         id: d.id,
@@ -81,7 +81,7 @@ const ChildhoodDiary = ({ data }) => {
         formatted_date: new Date(d.formatted_date),
       };
       diaryFormattedData.push(dObject);
-    });
+    })
     setFormattedData(diaryFormattedData);
   }, []);
 
@@ -96,7 +96,9 @@ const ChildhoodDiary = ({ data }) => {
   }, []);
 
   return (
-    formattedData && (<div>
+    <>
+    {JSON.stringify(data)}
+   { formattedData &&  (<div>
       <CanvasD3Scatter
         className={"staticGraphicContainer"}
         height={currentHeight * 0.95}
@@ -124,8 +126,10 @@ const ChildhoodDiary = ({ data }) => {
         </Scrollama>
       </div>
     </div>
+    )}
+    </>
     )
-  );
+
 };
 
 export const query = graphql`
