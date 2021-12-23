@@ -3,10 +3,10 @@ import CanvasD3Scatter from "../components/CanvasD3Scatter";
 import { useScrollData } from "scroll-data-hook";
 import { csv } from "d3";
 import { Scrollama, Step } from "react-scrollama";
-
-
+import { graphql } from "gatsby";
 
 const scatterScrollingtext = (scrollLocation) => {
+  console.log(scrollLocation)
   if (scrollLocation === 2) {
     return {
       title: (
@@ -50,101 +50,99 @@ const scatterScrollingtext = (scrollLocation) => {
   };
 };
 
-
-const ChildhoodDiary = () => {
-  const checkForUndefined=(windowsize)=> windowsize === undefined ? 1000 : windowsize
-
+const ChildhoodDiary = ({ data }) => {
+  const diaryRawData = data.allDataCsv.edges[0].node.items;
+  const [formattedData, setFormattedData] = useState(null);
   const [currentStepIndex, setCurrentStepIndex] = useState(null);
-  const [currentWidth, setCurrentWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 1000);
-  const [currentHeight, setCurrentHeight] = useState(typeof window !== "undefined" ? window.innerHeight: 1000);
-
-
-
-  const onStepEnter = ({ data }) => {
-    setCurrentStepIndex(data);
+  const [currentWidth, setCurrentWidth] = useState(
+    typeof window !== "undefined" ? window.innerWidth : 1000
+  );
+  const [currentHeight, setCurrentHeight] = useState(
+    typeof window !== "undefined" ? window.innerHeight : 1000
+  );
+  const onStepEnter = (stepdata) => {
+    setCurrentStepIndex(stepdata.data);
   };
 
-  const path = "/data/rye4_word_analysis.csv";
-  const [data, setData] = React.useState([]);
-  const [particles, setParticles] = React.useState([]);
-  const [loading, setLoading] = React.useState(true);
-
   React.useEffect(() => {
-    let particlesArr = [];
-    csv(path).then((d) => {
-      d.forEach((i, index) => {
-        let idGen = "i" + Math.random().toString(16).slice(-4) + "d";
-        let quarter = new Date(i.formatted_date).getFullYear();
-        let year = new Date(i.formatted_date).getFullYear();
+    const diaryFormattedData = [];
 
-        i.id = idGen;
-        i.date = i.date;
-        i.formatted_date = new Date(i.formatted_date);
-        i.month = new Date(i.formatted_date).getMonth();
-        i.year = new Date(i.formatted_date).getFullYear();
-        i.quarter = quarter;
-        i.index = index;
-        i.week = new Date(i.formatted_date).getDay();
-        i.radius = 20;
-        i.particles = particles;
-        i.formatted_date = new Date(i.formatted_date);
-      });
-      setData(d);
-      setParticles(particlesArr);
-      setLoading(false);
+    diaryRawData.forEach((d) => {
+      let dObject = {
+        id: d.id,
+        date: d.date,
+        entry_word_count: d.entry_word_count,
+        formatted_date: new Date(d.formatted_date),
+        month: new Date(d.formatted_date).getMonth(),
+        year: new Date(d.formatted_date).getFullYear(),
+        quarter: new Date(d.formatted_date).getFullYear(),
+        week: new Date(d.formatted_date).getDay(),
+        radius: 20,
+        formatted_date: new Date(d.formatted_date),
+      };
+      diaryFormattedData.push(dObject);
     });
-    return () => undefined;
+    setFormattedData(diaryFormattedData);
   }, []);
 
   React.useEffect(() => {
-
-    if( typeof window !== "undefined" ) {
-
-    window.onresize = function(event) {
-    setCurrentWidth(checkForUndefined(window.innerWidth))
-    setCurrentHeight(checkForUndefined(window.innerHeight))
+    if (typeof window !== "undefined") {
+      window.onresize = function (event) {
+        setCurrentWidth(window.innerWidth);
+        setCurrentHeight(window.innerHeight);
+      };
     }
-  };
-  return () => undefined;
+    return () => [{}];
   }, []);
-
 
   return (
-    <>
-      {!loading && (
-        <div>
-          <CanvasD3Scatter
-            className={"staticGraphicContainer"}
-            height={currentHeight * 0.95}
-            width={currentWidth * 0.6}
-            particles={data}
-            useScrollData={useScrollData}
-            hsla={"hsla(0, 100%, 65%, 1)"}
-            dateSelection={
-              scatterScrollingtext(currentStepIndex).date_selection
-            }
-            valueSelection="entry_word_count"
-            stepIndex={currentStepIndex}
-            margin={10}
-            marginLeft={currentWidth * 0.1}
-            marginTop={currentWidth * 0.3}
-          />
+    formattedData && (<div>
+      <CanvasD3Scatter
+        className={"staticGraphicContainer"}
+        height={currentHeight * 0.95}
+        width={currentWidth * 0.6}
+        particles={formattedData}
+        useScrollData={useScrollData}
+        hsla={"hsla(0, 100%, 65%, 1)"}
+        dateSelection={scatterScrollingtext(currentStepIndex).date_selection}
+        valueSelection="entry_word_count"
+        stepIndex={currentStepIndex}
+        margin={10}
+        marginLeft={currentWidth * 0.1}
+        marginTop={currentWidth * 0.3}
+      />
 
-          <div className="scrollingTextContainer darkModeScrollingTitle">
-            <Scrollama className="" offset={0.5} onStepEnter={onStepEnter}>
-              {[0, 1, 2, 3].map((_, stepIndex) => (
-                <Step data={stepIndex} key={stepIndex}>
-                  <div class="textStep">
-                    {scatterScrollingtext(stepIndex).title}
-                  </div>
-                </Step>
-              ))}
-            </Scrollama>
-          </div>
-        </div>
-      )}
-    </>
+      <div className="scrollingTextContainer darkModeScrollingTitle">
+        <Scrollama className="" offset={0.5} onStepEnter={onStepEnter}>
+          {[0, 1, 2, 3].map((_, stepIndex) => (
+            <Step data={stepIndex} key={stepIndex}>
+              <div class="textStep">
+                {scatterScrollingtext(stepIndex).title}
+              </div>
+            </Step>
+          ))}
+        </Scrollama>
+      </div>
+    </div>
+    )
   );
 };
+
+export const query = graphql`
+  query ChildhoodDiaryQuery {
+    allDataCsv {
+      edges {
+        node {
+          items {
+            date
+            formatted_date
+            entry_word_count
+            quarter
+          }
+        }
+      }
+    }
+  }
+`;
 
 export default ChildhoodDiary;

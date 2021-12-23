@@ -1,4 +1,8 @@
+const { typeNameFromDir } = require("gatsby-transformer-csv")
+
+
 module.exports = {
+  pathPrefix: '/reponame',
   siteMetadata: {
     siteUrl: "https://www.yourdomain.tld",
     title: "Visualization Sketches",
@@ -15,8 +19,39 @@ module.exports = {
       },
       __key: "pages",
     },
+    {
+      resolve: `gatsby-source-filesystem`,
+      options: {
+        name: `data`,
+        path: `${__dirname}/src/data/`,
+      },
+    },
+    {
+      resolve: `gatsby-transformer-csv`,
+      options: {
+        noheader: false,
+        typeName: typeNameFromDir,
+        nodePerFile: true,
+      },
+    },
   ],
 };
+
+
+// query MyQuery {
+//   allDataCsv(filter: {}) {
+//     edges {
+//       node {
+//         items {
+//           date
+//           entry_word_count
+//           formatted_date
+//           quarter
+//         }
+//       }
+//     }
+//   }
+// }
 
 
 const path = require("path")
