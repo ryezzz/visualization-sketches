@@ -27,28 +27,20 @@ workbox.core.clientsClaim();
  */
 self.__precacheManifest = [
   {
-    "url": "webpack-runtime-68db2fd959e3456b700b.js"
+    "url": "webpack-runtime-2991c385266ffa82ad09.js"
   },
   {
     "url": "framework-7357b6dab58473f763f1.js"
   },
   {
-    "url": "app-db5060b4321385644f96.js"
+    "url": "app-55b33f80c159d3b1de80.js"
   },
   {
     "url": "offline-plugin-app-shell-fallback/index.html",
-    "revision": "b51eaa98689bff56e7d24f06e0565456"
+    "revision": "d334301e3b58f27a46342e9270619433"
   },
   {
     "url": "component---cache-caches-gatsby-plugin-offline-app-shell-js-b39d944fec15e3bc0224.js"
-  },
-  {
-    "url": "page-data/offline-plugin-app-shell-fallback/page-data.json",
-    "revision": "f2c002077289a7e1ac538802bc7f5314"
-  },
-  {
-    "url": "page-data/app-data.json",
-    "revision": "4e2d73a4261e316fef9dd88289aa2bb6"
   },
   {
     "url": "polyfill-743de0596306b5828f30.js"
@@ -61,6 +53,10 @@ self.__precacheManifest = [
     "revision": "19c62334d769f485c4795d50716183f3"
   },
   {
+    "url": "page-data/app-data.json",
+    "revision": "15ab5003f4933d863d9d9957edcf57fa"
+  },
+  {
     "url": "page-data/404.html/page-data.json",
     "revision": "fd191c357c2cfd0a5cd21901f231596a"
   },
@@ -68,7 +64,7 @@ self.__precacheManifest = [
     "url": "styles.1cce187ccbd918ae56b5.css"
   },
   {
-    "url": "component---src-pages-childhood-diary-js-f055615e7192a2a583c1.js"
+    "url": "component---src-pages-childhood-diary-js-55e49e74450e234b42c4.js"
   },
   {
     "url": "page-data/childhood-diary/page-data.json",
@@ -166,12 +162,12 @@ const navigationRoute = new NavigationRoute(async ({ event }) => {
   lastNavigationRequest = event.request.url
 
   let { pathname } = new URL(event.request.url)
-  pathname = pathname.replace(new RegExp(`^/visualization-sketches`), ``)
+  pathname = pathname.replace(new RegExp(`^`), ``)
 
   // Check for resources + the app bundle
   // The latter may not exist if the SW is updating to a new version
   const resources = await idbKeyval.get(`resources:${pathname}`)
-  if (!resources || !(await caches.match(`/visualization-sketches/app-db5060b4321385644f96.js`))) {
+  if (!resources || !(await caches.match(`/app-55b33f80c159d3b1de80.js`))) {
     return await fetch(event.request)
   }
 
@@ -184,7 +180,7 @@ const navigationRoute = new NavigationRoute(async ({ event }) => {
     }
   }
 
-  const offlineShell = `/visualization-sketches/offline-plugin-app-shell-fallback/index.html`
+  const offlineShell = `/offline-plugin-app-shell-fallback/index.html`
   const offlineShellWithKey = workbox.precaching.getCacheKeyForURL(offlineShell)
   return await caches.match(offlineShellWithKey)
 })
