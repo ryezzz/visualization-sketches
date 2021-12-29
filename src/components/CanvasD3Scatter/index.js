@@ -12,7 +12,8 @@ console.log("is browser", isBrowser())
 
 
 const Veroni = (props) => {
-  const [pixelRatio, setPixelRatio] = useState(2);
+  // const [pixelRatio, setPixelRatio] = useState(2);
+  const pixelRatio = props.pixelRatio;
 
   const destinationParticles = [];
   const originParticles = [];
@@ -27,6 +28,7 @@ const Veroni = (props) => {
   let axisRef = useRef();
   const radius = 8;
 
+  ////MOVE TO HOOKS
   const usePrevious = (value, defaultRef) => {
     const ref = useRef(defaultRef);
     useEffect(() => {
@@ -84,7 +86,6 @@ const Veroni = (props) => {
     tooltip
       .style("opacity", 0.7)
       .style("display", "block")
-
       .style("top", yScalei + "px")
       .style("left", xScalei + 15 + "px")
       .style("z-index", 5)
@@ -119,10 +120,6 @@ const Veroni = (props) => {
   animatedParticles();
 
   useEffect(() => {
-
-    // SCALE CANVAS
-    setPixelRatio(typeof window !== "undefined" ? window.devicePixelRatio : 1)
-
     const canvas = ref.current;
     const context = canvas.getContext("2d");
     context.scale(pixelRatio, pixelRatio);
@@ -130,9 +127,7 @@ const Veroni = (props) => {
     context.globalAlpha = 0.5;
     // END SCALE CANVAS
 
-    const update = (hoverActive = false) => {
-      // hideTooltip();
-
+    const update = () => {
       context.clearRect(0, 0, width, height);
 
       // Animate
@@ -166,7 +161,6 @@ const Veroni = (props) => {
     };
 
     onscroll = (event) => {
-      // hideTooltip();
       pointHoverOut();
     };
 
@@ -193,11 +187,13 @@ const Veroni = (props) => {
 
     function hideTooltip(hoverInactive) {
       isBrowser && tooltip.style("display", "none");
+      isBrowser && tooltip.style("opacity", "0");
+
     }
 
     onmousemove = (event) => {
-      // event.preventDefault();
-      const pageYoffset = typeof window !== "undefined" ? window.pageYOffset : 0
+      event.preventDefault();
+      const pageYoffset = isBrowser() ? window.pageYOffset : 0
       let mousePoint = d3.pointer(event, this);
       let x = mousePoint[0];
       let y = mousePoint[1] - [pageYoffset];
