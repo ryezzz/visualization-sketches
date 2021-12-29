@@ -2,12 +2,18 @@ const { typeNameFromDir } = require("gatsby-transformer-csv")
 
 
 module.exports = {
-  pathPrefix: '/reponame',
+  // pathPrefix: '/visualization-sketches',
+    pathPrefix: '/',
+
   siteMetadata: {
     siteUrl: "https://www.yourdomain.tld",
     title: "Visualization Sketches",
   },
-  plugins: [
+  plugins: [{
+    resolve: `gatsby-plugin-styled-components`,
+    options: {
+    },
+  },
     "gatsby-plugin-sass",
 
     "gatsby-plugin-mdx",
@@ -27,6 +33,12 @@ module.exports = {
       },
     },
     {
+      resolve: `gatsby-plugin-offline`,
+      options: {
+        precachePages: [`/*`],
+      },
+    },
+    {
       resolve: `gatsby-transformer-csv`,
       options: {
         noheader: false,
@@ -38,20 +50,6 @@ module.exports = {
 };
 
 
-// query MyQuery {
-//   allDataCsv(filter: {}) {
-//     edges {
-//       node {
-//         items {
-//           date
-//           entry_word_count
-//           formatted_date
-//           quarter
-//         }
-//       }
-//     }
-//   }
-// }
 
 
 const path = require("path")
