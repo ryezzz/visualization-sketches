@@ -3,21 +3,17 @@ import { useEffect, useRef } from "react";
 import { Delaunay } from "d3-delaunay";
 import * as d3 from "d3";
 import React, { useState } from "react";
-import { easeCubicInOut } from "d3-ease";
 import { gsap } from "gsap";
-import { toArray } from "gsap/all";
-import { FastLayer } from "react-konva";
-import { Axis, axisPropsFromTickScale, LEFT } from "react-d3-axis";
-import { date } from "faker/lib/locales/vi";
-
-const checkForUndefined=(windowsize, defaultValue)=> windowsize === undefined ? defaultValue : windowsize
-export const isBrowser = () => typeof window !== "undefined"
 
 
-const pixelRatio = typeof window !== "undefined" ? window.devicePixelRatio : 1;
+const isBrowser = () => typeof window !== "undefined"
+console.log("is browser", isBrowser())
+
 
 
 const Veroni = (props) => {
+  const [pixelRatio, setPixelRatio] = useState(2);
+
   const destinationParticles = [];
   const originParticles = [];
   let height = props.height;
@@ -27,7 +23,6 @@ const Veroni = (props) => {
   let marginTop = props.marginTop;
   let particles = props.particles;
   let ref = useRef();
-  let pointRef = useRef();
   let highlightRef = useRef();
   let axisRef = useRef();
   const radius = 8;
@@ -47,11 +42,6 @@ const Veroni = (props) => {
       .scaleLinear()
       .domain(d3.extent(particles, (d) => d[dateSelection]))
       .range([marginLeft, width - margin]);
-
-  let xScaleFaster = d3
-    .scaleLinear()
-    .domain(d3.extent(particles, (d) => d[props.dateSelection]))
-    .range([margin, width - margin]);
 
   let yScale = d3
     .scaleLinear()
@@ -76,8 +66,7 @@ const Veroni = (props) => {
       });
     });
 
-  const tooltip = d3
-    .select("#tooltipDiv")
+  const tooltip = isBrowser() && d3.select("#tooltipDiv")
     .style("background-color", "white")
     .style("border", "1px solid")
     .style("border-radius", "2px")
@@ -88,7 +77,10 @@ const Veroni = (props) => {
     .style("opacity", 1)
     .style("padding", "10px");
 
+
+
   function showTooltip(tooltipX, tooltipY, tooltipZ, xScalei, yScalei) {
+    isBrowser() &&
     tooltip
       .style("opacity", 0.7)
       .style("display", "block")
@@ -127,7 +119,10 @@ const Veroni = (props) => {
   animatedParticles();
 
   useEffect(() => {
+
     // SCALE CANVAS
+    setPixelRatio(typeof window !== "undefined" ? window.devicePixelRatio : 1)
+
     const canvas = ref.current;
     const context = canvas.getContext("2d");
     context.scale(pixelRatio, pixelRatio);
@@ -136,7 +131,7 @@ const Veroni = (props) => {
     // END SCALE CANVAS
 
     const update = (hoverActive = false) => {
-      hideTooltip();
+      // hideTooltip();
 
       context.clearRect(0, 0, width, height);
 
@@ -171,7 +166,7 @@ const Veroni = (props) => {
     };
 
     onscroll = (event) => {
-      hideTooltip();
+      // hideTooltip();
       pointHoverOut();
     };
 
@@ -197,7 +192,7 @@ const Veroni = (props) => {
     };
 
     function hideTooltip(hoverInactive) {
-      tooltip.style("display", "none");
+      isBrowser && tooltip.style("display", "none");
     }
 
     onmousemove = (event) => {
@@ -230,7 +225,7 @@ const Veroni = (props) => {
     };
 
     update();
-  }, [props.dateSelection, props.width]);
+  }, [props.dateSelection, props.width, props.height]);
 
   return (
     <div className="canvasStickyChartContainer">
@@ -248,8 +243,8 @@ const Veroni = (props) => {
           ref={highlightRef}
         ></circle>
       </svg>
-
-      <canvas
+{console.log("HEIGHT WIDTH 0", props.height, props.width, pixelRatio)}
+    <canvas
         className={"canvasStickyChart"}
         style={{
           width: props.width  + "px",
