@@ -2,8 +2,8 @@ const { typeNameFromDir } = require("gatsby-transformer-csv")
 
 
 module.exports = {
-  // pathPrefix: '/visualization-sketches',
-    pathPrefix: '/',
+  pathPrefix: '/visualization-sketches',
+    // pathPrefix: '/',
 
   siteMetadata: {
     siteUrl: "https://www.yourdomain.tld",

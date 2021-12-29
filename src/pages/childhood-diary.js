@@ -52,15 +52,17 @@ const scatterScrollingtext = (scrollLocation) => {
 };
 
 const ChildhoodDiary = ({ data }, props) => {
-
+  const isBrowser = () => typeof window !== "undefined"
   const diaryRawData = data.allDataCsv.edges[0].node.items;
   const [currentStepIndex, setCurrentStepIndex] = useState(1);
   const [currentWidth, setCurrentWidth] = useState(
-    typeof window != "undefined" ? window.innerWidth : 0
+    isBrowser() ? window.innerWidth : 0
   );
   const [currentHeight, setCurrentHeight] = useState(
-    typeof window != "undefined" ? window.innerHeight : 0
+    isBrowser() ? window.innerHeight : 0
   );
+  const [pixelRatio, setPixelRatio] = useState(isBrowser() ? window.devicePixelRatio : 1);
+
   const onStepEnter = (stepdata) => {
     setCurrentStepIndex(stepdata.data);
   };
@@ -86,13 +88,13 @@ const ChildhoodDiary = ({ data }, props) => {
   };
 
   React.useEffect(() => {
-    if (typeof window != "undefined") {
+    if (isBrowser()) {
+
       setCurrentWidth(window.innerWidth);
       setCurrentHeight(window.innerHeight);
-      window.onload = () => {
-        setCurrentWidth(window.innerWidth);
-        setCurrentHeight(window.innerHeight);
-      }
+      setPixelRatio(isBrowser() ? window.devicePixelRatio : 1)
+
+
       window.onresize = function (event) {
         console.log('window loaded')
         setCurrentWidth(window.innerWidth);
@@ -100,7 +102,7 @@ const ChildhoodDiary = ({ data }, props) => {
       };
 
     }
-  }, [currentWidth, currentHeight]);
+  }, [currentWidth, currentHeight, pixelRatio]);
 
 const windowHeightWidth =()=> {
   if (typeof window != "undefined") {
@@ -136,6 +138,7 @@ if (typeof window === `undefined`) {
           margin={10}
           marginLeft={currentWidth * 0.1}
           marginTop={currentHeight * 0.7}
+          pixelRatio={pixelRatio}
         />
         <div className="scrollingTextContainer darkModeScrollingTitle">
           <Scrollama className="" offset={0.5} onStepEnter={onStepEnter}>
