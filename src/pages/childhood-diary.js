@@ -3,133 +3,55 @@ import CanvasD3Scatter from "../components/CanvasD3Scatter";
 import { useScrollData } from "scroll-data-hook";
 import { Scrollama, Step } from "react-scrollama";
 import { graphql } from "gatsby";
-import "../styles.css"
-import { json } from "d3";
+import "../styles.css";
+import { isBrowser } from "../utils/staticRendering";
+import { scatterScrollingtext } from "../utils/childhoodDiaryUtils";
+import { formatDataFunct } from "../utils/childhoodDiaryUtils";
 
-const scatterScrollingtext = (scrollLocation) => {
-  console.log(scrollLocation);
-  if (scrollLocation === 2) {
-    return {
-      title: (
-        <>
-          Diary Entries by <b>week</b>
-        </>
-      ),
-      date_selection: "week",
-    };
-  }
-
-  if (scrollLocation === 1) {
-    return {
-      title: (
-        <>
-          Diary Entries by <b>month</b>
-        </>
-      ),
-      date_selection: "month",
-    };
-  }
-
-  if (scrollLocation === 0) {
-    return {
-      title: (
-        <>
-          Diary Entries by <b>year</b>
-        </>
-      ),
-      date_selection: "year",
-    };
-  }
-
-  return {
-    title: (
-      <>
-        Diary Entries by <b>year</b>
-      </>
-    ),
-    date_selection: "year",
-  };
-};
-
-const ChildhoodDiary = ({ data }, props) => {
-  const isBrowser = () => typeof window !== "undefined"
+const ChildhoodDiary = ({ data }) => {
   const diaryRawData = data.allDataCsv.edges[0].node.items;
+
   const [currentStepIndex, setCurrentStepIndex] = useState(1);
+
+  const [pixelRatio, setPixelRatio] = useState(
+    isBrowser() ? window.devicePixelRatio : 1
+  );
   const [currentWidth, setCurrentWidth] = useState(
     isBrowser() ? window.innerWidth : 0
   );
   const [currentHeight, setCurrentHeight] = useState(
     isBrowser() ? window.innerHeight : 0
   );
-  const [pixelRatio, setPixelRatio] = useState(isBrowser() ? window.devicePixelRatio : 1);
-
   const onStepEnter = (stepdata) => {
     setCurrentStepIndex(stepdata.data);
   };
 
-  const formatDatafFunct = (dataElem) => {
-    const diaryFormattedData = [];
-    dataElem.forEach((d) => {
-      let dObject = {
-        id: d.id,
-        date: d.date,
-        entry_word_count: d.entry_word_count,
-        formatted_date: new Date(d.formatted_date),
-        month: new Date(d.formatted_date).getMonth(),
-        year: new Date(d.formatted_date).getFullYear(),
-        quarter: new Date(d.formatted_date).getFullYear(),
-        week: new Date(d.formatted_date).getDay(),
-        radius: 20,
-        formatted_date: new Date(d.formatted_date),
-      };
-      diaryFormattedData.push(dObject);
-    });
-    return diaryFormattedData;
-  };
-
   React.useEffect(() => {
     if (isBrowser()) {
-
       setCurrentWidth(window.innerWidth);
       setCurrentHeight(window.innerHeight);
-      setPixelRatio(isBrowser() ? window.devicePixelRatio : 1)
-
-
+      setPixelRatio(isBrowser() ? window.devicePixelRatio : 1);
       window.onresize = function (event) {
-        console.log('window loaded')
         setCurrentWidth(window.innerWidth);
         setCurrentHeight(window.innerHeight);
       };
-
     }
   }, [currentWidth, currentHeight, pixelRatio]);
 
-const windowHeightWidth =()=> {
-  if (typeof window != "undefined") {
-    return {width: window.innerWidth, height: window.innerHeight}
 
+  if (isBrowser()===false) {
+    return <></>;
   }
 
-  window.onload = () => {
-    return {width: window.innerWidth, height: window.innerHeight}
-    }
-
-  return 0
-}
-
-
-if (typeof window === `undefined`) {
-  return(<></>);
-}
   return (
-
     <div>
       <div>
+
         <CanvasD3Scatter
           className={"staticGraphicContainer"}
           height={currentHeight * 0.95}
           width={currentWidth * 0.6}
-          particles={formatDatafFunct(diaryRawData)}
+          particles={formatDataFunct(diaryRawData)}
           useScrollData={useScrollData}
           hsla={"hsla(0, 100%, 65%, 1)"}
           dateSelection={scatterScrollingtext(currentStepIndex).date_selection}
@@ -140,7 +62,9 @@ if (typeof window === `undefined`) {
           marginTop={currentHeight * 0.7}
           pixelRatio={pixelRatio}
         />
+
         <div className="scrollingTextContainer darkModeScrollingTitle">
+
           <Scrollama className="" offset={0.5} onStepEnter={onStepEnter}>
             {[0, 1, 2, 3].map((_, stepIndex) => (
               <Step data={stepIndex} key={stepIndex}>
@@ -150,6 +74,7 @@ if (typeof window === `undefined`) {
               </Step>
             ))}
           </Scrollama>
+
         </div>
       </div>
     </div>

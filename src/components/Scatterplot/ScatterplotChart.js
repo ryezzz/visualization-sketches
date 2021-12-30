@@ -115,10 +115,7 @@ const yAxisRef = React.useRef(null);
         r={4}
         onMouseEnter={
           () =>
-            // setNewTooltip({date: di.formatted_date,  value: di.entry_word_count, x:i * 8, y:-8 * i})
-            // console.log(circleRef)
             setNewTooltip(circleRef2.current)
-          // console.log("ENTERED")
         }
         onMouseLeave={() => setNewTooltip("")}
       />
@@ -139,7 +136,6 @@ const yAxisRef = React.useRef(null);
                 cx={xScale(xDimension(d))}
                 cy={yScale(yDimension(d))}
                 r={5}
-                // onMouseOver={(e)=>console.log(e)}
                 onMouseOver={() => setTooltip(d)}
               />
             ))}

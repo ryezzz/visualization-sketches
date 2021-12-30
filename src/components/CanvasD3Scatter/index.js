@@ -2,13 +2,9 @@
 import { useEffect, useRef } from "react";
 import { Delaunay } from "d3-delaunay";
 import * as d3 from "d3";
-import React, { useState } from "react";
+import React from "react";
 import { gsap } from "gsap";
-
-
-const isBrowser = () => typeof window !== "undefined"
-console.log("is browser", isBrowser())
-
+import { isBrowser } from "../../utils/staticRendering";
 
 
 const Veroni = (props) => {
@@ -27,7 +23,6 @@ const Veroni = (props) => {
   let highlightRef = useRef();
   let axisRef = useRef();
   const radius = 8;
-
   ////MOVE TO HOOKS
   const usePrevious = (value, defaultRef) => {
     const ref = useRef(defaultRef);
@@ -76,7 +71,7 @@ const Veroni = (props) => {
       "box-shadow",
       "0 3px 6px rgba(0, 0, 0, 0.3), 0 3px 6px rgba(0, 0, 0, 0.4)"
     )
-    .style("opacity", 1)
+    .style("opacity", 0)
     .style("padding", "10px");
 
 
@@ -115,7 +110,7 @@ const Veroni = (props) => {
     .ticks(5)
     .tickFormat((d) => `${d}`);
 
-  d3.select(axisRef.current).call(xAxis);
+  // d3.select(axisRef.current).call(xAxis);
 
   animatedParticles();
 
@@ -124,11 +119,13 @@ const Veroni = (props) => {
     const context = canvas.getContext("2d");
     context.scale(pixelRatio, pixelRatio);
     context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-    context.globalAlpha = 0.5;
+    context.globalAlpha = .4;
     // END SCALE CANVAS
 
     const update = () => {
       context.clearRect(0, 0, width, height);
+      // const animatedParticle = (particle, xSelection, scale) => scale (particle[xSelection],xSelection)(particle[xSelection],xSelection)
+      // const animatedParticleY = (particle, scale) => scale (particle,particle)
 
       // Animate
       gsap.fromTo(
@@ -140,20 +137,34 @@ const Veroni = (props) => {
         {
           x: (index) => destinationParticles[index].x,
           y: (index) => destinationParticles[index].y,
-          ease: "power.3.out",
-          duration: 0.3,
+          // ease: "power.3.out",
+          duration: .8,
+          delay: .001,
+          // Documentation: https://greensock.com/docs/v3/Staggers
+          ease: "strong.inOut",
           onUpdate: animate,
+          stagger: {
+            each: .0005,
+            from: 1,
+          }
+
         }
       );
 
+      context.fillStyle = "rgb(226, 99, 255)";
+      context.strokeStyle = "rgb(226, 99, 255)";
+
+
       function animate() {
         context.clearRect(0, 0, width, height);
+
+        d3.select(axisRef.current).call(xAxis).transition();
         context.beginPath();
-        context.fillStyle = "rgb(226, 99, 255)";
         originParticles.map(
-          (d, i) => (
+          (d) => (
             context.beginPath(),
             context.arc(d.x, d.y, radius, 0, 2 * Math.PI),
+            // context.stroke()
             context.fill()
           )
         );
@@ -177,8 +188,8 @@ const Veroni = (props) => {
         .attr("r", radius)
         .attr("cx", xSelection)
         .attr("cy", ySelection)
-        .attr("fill", "rgba(255,255,255,.3)")
-        .attr("stroke", "rgba(255,255,255, 1)");
+        .attr("fill", "rgba(255,255,255,.7)")
+        // .attr("stroke", "rgba(255,255,255, 1)");
     };
 
     const pointHoverOut = () => {
@@ -239,7 +250,6 @@ const Veroni = (props) => {
           ref={highlightRef}
         ></circle>
       </svg>
-{console.log("HEIGHT WIDTH 0", props.height, props.width, pixelRatio)}
     <canvas
         className={"canvasStickyChart"}
         style={{

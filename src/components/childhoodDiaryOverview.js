@@ -16,8 +16,6 @@ import {useResizeObserver} from "../hooks/customHooks";
  */
 
 function ChildhoodDiaryOverview({ data, keys, colors }) {
-console.log (data)
-
   const svgRef = useRef();
   const yAxisRef = useRef();
   const wrapperRef = useRef();

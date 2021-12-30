@@ -3,14 +3,17 @@ body {
   background-color: rgb(26, 26, 26);
   /* color: white */
 }
-
+html {
+  font-family: "bitter";
+  font-weight: 100;
+  }
 
 .darkModeScrollingTitle{
   color: rgb(202, 202, 202);
 }
 
 .darkModeAxis{
-  color: rgb(77, 77, 77)
+  color: rgb(177, 177, 177)
 }
 
 
@@ -36,12 +39,16 @@ body {
   /* height: 100%;
   width: 100%; */
   font-size: 40px;
-  margin-top: 200%;
+  padding-top: 80%;
   margin-bottom: 200%;
 
 }
 
-
+@media only screen and (max-width: 600px)  {
+  .textStep{
+  padding-top: 200%;
+  }
+}
 .tooltipDiv{
   position: absolute;
   pointer-events: "none";
