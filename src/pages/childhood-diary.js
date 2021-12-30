@@ -11,10 +11,10 @@ import { formatDataFunct } from "../utils/childhoodDiaryUtils";
 const ChildhoodDiary = ({ data }) => {
   const diaryRawData = data.allDataCsv.edges[0].node.items;
 
-  const [currentStepIndex, setCurrentStepIndex] = useState(1);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
   const [pixelRatio, setPixelRatio] = useState(
-    isBrowser() ? window.devicePixelRatio : 1
+    isBrowser() ? window.devicePixelRatio : 0
   );
   const [currentWidth, setCurrentWidth] = useState(
     isBrowser() ? window.innerWidth : 0
@@ -22,6 +22,7 @@ const ChildhoodDiary = ({ data }) => {
   const [currentHeight, setCurrentHeight] = useState(
     isBrowser() ? window.innerHeight : 0
   );
+
   const onStepEnter = (stepdata) => {
     setCurrentStepIndex(stepdata.data);
   };
@@ -30,10 +31,12 @@ const ChildhoodDiary = ({ data }) => {
     if (isBrowser()) {
       setCurrentWidth(window.innerWidth);
       setCurrentHeight(window.innerHeight);
-      setPixelRatio(isBrowser() ? window.devicePixelRatio : 1);
+      setPixelRatio(window.devicePixelRatio);
       window.onresize = function (event) {
         setCurrentWidth(window.innerWidth);
         setCurrentHeight(window.innerHeight);
+        setPixelRatio(window.devicePixelRatio);
+
       };
     }
   }, [currentWidth, currentHeight, pixelRatio]);
@@ -44,7 +47,7 @@ const ChildhoodDiary = ({ data }) => {
   }
 
   return (
-    <div>
+    <div className="fixedContainer">
       <div>
 
         <CanvasD3Scatter
@@ -65,10 +68,11 @@ const ChildhoodDiary = ({ data }) => {
 
         <div className="scrollingTextContainer darkModeScrollingTitle">
 
-          <Scrollama className="" offset={0.5} onStepEnter={onStepEnter}>
+          <Scrollama className="" offset={0.5} onStepEnter={onStepEnter} debug={false}>
             {[0, 1, 2, 3].map((_, stepIndex) => (
               <Step data={stepIndex} key={stepIndex}>
-                <div class="textStep">
+                <div style={{                opacity: currentStepIndex === stepIndex ? 1 : 0.2,
+}} class="textStep">
                   {scatterScrollingtext(stepIndex).title}
                 </div>
               </Step>

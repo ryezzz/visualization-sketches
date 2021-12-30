@@ -92,7 +92,7 @@ const yAxisRef = React.useRef(null);
   let minDate = data[0][0] != undefined && data[0][0].quarter;
   let maxDate = data[0][0] != undefined && data[data.length - 1][0].quarter;
 
-  const xScale1 = d3.scaleTime();
+  // const xScale1 = d3.scaleTime();
   // .domain(d3.extent(data, xDimension))
   // .domain([maxDate, minDate])
   // .range([height - (padding + 10), padding + 10]);

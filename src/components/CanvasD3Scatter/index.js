@@ -111,10 +111,12 @@ const Veroni = (props) => {
     .tickFormat((d) => `${d}`);
 
   // d3.select(axisRef.current).call(xAxis);
-
   animatedParticles();
 
+
   useEffect(() => {
+    // animatedParticles();
+
     const canvas = ref.current;
     const context = canvas.getContext("2d");
     context.scale(pixelRatio, pixelRatio);
@@ -123,7 +125,7 @@ const Veroni = (props) => {
     // END SCALE CANVAS
 
     const update = () => {
-      context.clearRect(0, 0, width, height);
+      // context.clearRect(0, 0, width, height);
       // const animatedParticle = (particle, xSelection, scale) => scale (particle[xSelection],xSelection)(particle[xSelection],xSelection)
       // const animatedParticleY = (particle, scale) => scale (particle,particle)
 
@@ -139,13 +141,13 @@ const Veroni = (props) => {
           y: (index) => destinationParticles[index].y,
           // ease: "power.3.out",
           duration: .8,
-          delay: .001,
+          // delay: .001,
           // Documentation: https://greensock.com/docs/v3/Staggers
           ease: "strong.inOut",
           onUpdate: animate,
           stagger: {
             each: .0005,
-            from: 1,
+            from: "random",
           }
 
         }
@@ -232,8 +234,11 @@ const Veroni = (props) => {
     };
 
     update();
-  }, [props.dateSelection, props.width, props.height]);
+  }, [props.dateSelection, props.width, props.height, props.pixelRatio]);
 
+  if (isBrowser()===false) {
+    return <></>;
+  }
   return (
     <div className="canvasStickyChartContainer">
 
@@ -259,8 +264,8 @@ const Veroni = (props) => {
         ref={ref}
         particles={props.particles}
         stroke={props.stroke}
-        width={props.width * pixelRatio}
-        height={props.height * pixelRatio}
+        width={props.width * props.pixelRatio}
+        height={props.height * props.pixelRatio}
         useScrollData={props.useScrollData}
         dateSelection={props.dateSelection}
         valueSelection={props.valueSelection}
