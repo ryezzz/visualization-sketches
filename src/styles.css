@@ -3,17 +3,23 @@ body {
   background-color: rgb(26, 26, 26);
   /* color: white */
 }
-
+html {
+  font-family: "bitter";
+  font-weight: 100;
+  }
 
 .darkModeScrollingTitle{
   color: rgb(202, 202, 202);
 }
 
 .darkModeAxis{
-  color: rgb(77, 77, 77)
+  color: rgb(177, 177, 177)
 }
 
-
+.fixedContainer{
+  /* position: fixed; */
+  overscroll-behavior: hide;
+}
 .scrollingTextContainer{
   width: 30%;
   float: right;
@@ -22,26 +28,38 @@ body {
   left: "70%";
   font-size: "50px";
   max-width: "25%";
-  height: "100px";
-  margin-top: "30vh";
-  margin-bottom: "50px";
+  min-height: 300vh;
 }
 
 
 .textStep{
-  max-height: 100vh;
-  overflow: auto;
+  background-color: rgba(235, 133, 255, 0.08);
+  border: solid 3px rgba(235, 133, 255, 0.1);
+
+  transition: opacity;
+  transition-duration: 1;
+
+
+  /* max-height: 100vh; */
+  overflow: hidden;
   position: relative ;
   color: white;
   /* height: 100%;
   width: 100%; */
+  padding-left: 5%;
+  padding-right: 5%;
+
   font-size: 40px;
-  margin-top: 200%;
-  margin-bottom: 200%;
+  padding-top: 30vh;
+  padding-bottom: 30vh;
 
 }
 
-
+@media only screen and (max-width: 600px)  {
+  .textStep{
+    padding-top: 20vh;
+    padding-bottom: 20vh;  }
+}
 .tooltipDiv{
   position: absolute;
   pointer-events: "none";

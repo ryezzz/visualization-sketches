@@ -37,8 +37,6 @@ const Veroni = (props) => {
 
      context.canvas.ontouchmove = context.canvas.onmousemove = (event) => {
       event.preventDefault();
-      console.log(context)
-      // particles[0] = [event.layerX, event.layerY];
       update();
     };
 

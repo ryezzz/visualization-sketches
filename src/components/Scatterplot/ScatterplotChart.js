@@ -92,7 +92,7 @@ const yAxisRef = React.useRef(null);
   let minDate = data[0][0] != undefined && data[0][0].quarter;
   let maxDate = data[0][0] != undefined && data[data.length - 1][0].quarter;
 
-  const xScale1 = d3.scaleTime();
+  // const xScale1 = d3.scaleTime();
   // .domain(d3.extent(data, xDimension))
   // .domain([maxDate, minDate])
   // .range([height - (padding + 10), padding + 10]);
@@ -115,10 +115,7 @@ const yAxisRef = React.useRef(null);
         r={4}
         onMouseEnter={
           () =>
-            // setNewTooltip({date: di.formatted_date,  value: di.entry_word_count, x:i * 8, y:-8 * i})
-            // console.log(circleRef)
             setNewTooltip(circleRef2.current)
-          // console.log("ENTERED")
         }
         onMouseLeave={() => setNewTooltip("")}
       />
@@ -139,7 +136,6 @@ const yAxisRef = React.useRef(null);
                 cx={xScale(xDimension(d))}
                 cy={yScale(yDimension(d))}
                 r={5}
-                // onMouseOver={(e)=>console.log(e)}
                 onMouseOver={() => setTooltip(d)}
               />
             ))}
