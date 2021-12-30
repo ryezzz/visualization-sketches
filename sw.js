@@ -27,17 +27,17 @@ workbox.core.clientsClaim();
  */
 self.__precacheManifest = [
   {
-    "url": "webpack-runtime-9ac96dce0a7c84403212.js"
+    "url": "webpack-runtime-8231af55d018047b17b5.js"
   },
   {
     "url": "framework-7357b6dab58473f763f1.js"
   },
   {
-    "url": "app-db5060b4321385644f96.js"
+    "url": "app-064106b6f5d57271385d.js"
   },
   {
     "url": "offline-plugin-app-shell-fallback/index.html",
-    "revision": "63c80610d8a522cbdcf6134559e93efb"
+    "revision": "ed5c94dbe77f08a0cb9ecc927a3762a6"
   },
   {
     "url": "component---cache-caches-gatsby-plugin-offline-app-shell-js-b39d944fec15e3bc0224.js"
@@ -48,7 +48,7 @@ self.__precacheManifest = [
   },
   {
     "url": "page-data/app-data.json",
-    "revision": "ec0018be5cb20015088b6d73a72fa586"
+    "revision": "a965d69320b958f4a274a2b6561ba09a"
   },
   {
     "url": "polyfill-743de0596306b5828f30.js"
@@ -65,10 +65,10 @@ self.__precacheManifest = [
     "revision": "fd191c357c2cfd0a5cd21901f231596a"
   },
   {
-    "url": "styles.1cce187ccbd918ae56b5.css"
+    "url": "styles.e1ea13860dd50145f8f3.css"
   },
   {
-    "url": "component---src-pages-childhood-diary-js-5cda563b0ba29eac0c55.js"
+    "url": "component---src-pages-childhood-diary-js-9196dfe7e88a47d5a6a7.js"
   },
   {
     "url": "page-data/childhood-diary/page-data.json",
@@ -171,7 +171,7 @@ const navigationRoute = new NavigationRoute(async ({ event }) => {
   // Check for resources + the app bundle
   // The latter may not exist if the SW is updating to a new version
   const resources = await idbKeyval.get(`resources:${pathname}`)
-  if (!resources || !(await caches.match(`/visualization-sketches/app-db5060b4321385644f96.js`))) {
+  if (!resources || !(await caches.match(`/visualization-sketches/app-064106b6f5d57271385d.js`))) {
     return await fetch(event.request)
   }
 
