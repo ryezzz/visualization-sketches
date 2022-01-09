@@ -27,17 +27,17 @@ workbox.core.clientsClaim();
  */
 self.__precacheManifest = [
   {
-    "url": "webpack-runtime-65427ef39f07151eba26.js"
+    "url": "webpack-runtime-491ff67b0d92290bcd81.js"
   },
   {
     "url": "framework-7357b6dab58473f763f1.js"
   },
   {
-    "url": "app-bb392110eb785f993632.js"
+    "url": "app-08f1b81502c0b5bc6bf2.js"
   },
   {
     "url": "offline-plugin-app-shell-fallback/index.html",
-    "revision": "3544b1253eb8f464763b59eca9be07e7"
+    "revision": "b400ae36a6d8c47fadf3f25682f302f8"
   },
   {
     "url": "component---cache-caches-gatsby-plugin-offline-app-shell-js-b39d944fec15e3bc0224.js"
@@ -48,7 +48,7 @@ self.__precacheManifest = [
   },
   {
     "url": "page-data/app-data.json",
-    "revision": "c13c1feb2396b4bcbd0f712ac58cca41"
+    "revision": "4f901cbf7510d55d783f490a858366af"
   },
   {
     "url": "polyfill-743de0596306b5828f30.js"
@@ -78,7 +78,7 @@ self.__precacheManifest = [
     "revision": "f40901a8dfb4853e175273ecd97f9d32"
   },
   {
-    "url": "component---src-pages-childhood-diary-binned-js-f3258e1db7bdd3e68373.js"
+    "url": "component---src-pages-childhood-diary-binned-js-3578688a58c77a447b28.js"
   },
   {
     "url": "page-data/childhood-diary-binned/page-data.json",
@@ -92,7 +92,7 @@ self.__precacheManifest = [
     "revision": "00a514a1b79e080105a7b0f1f2a90fa0"
   },
   {
-    "url": "component---src-pages-childhood-diary-swarm-js-da9ad96915b7f3b9952f.js"
+    "url": "component---src-pages-childhood-diary-swarm-js-5f8c805791959a094af8.js"
   },
   {
     "url": "page-data/childhood-diary-swarm/page-data.json",
@@ -195,7 +195,7 @@ const navigationRoute = new NavigationRoute(async ({ event }) => {
   // Check for resources + the app bundle
   // The latter may not exist if the SW is updating to a new version
   const resources = await idbKeyval.get(`resources:${pathname}`)
-  if (!resources || !(await caches.match(`/visualization-sketches/app-bb392110eb785f993632.js`))) {
+  if (!resources || !(await caches.match(`/visualization-sketches/app-08f1b81502c0b5bc6bf2.js`))) {
     return await fetch(event.request)
   }
 
