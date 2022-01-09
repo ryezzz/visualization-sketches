@@ -9,7 +9,8 @@ module.exports = {
     siteUrl: "https://www.yourdomain.tld",
     title: "Visualization Sketches",
   },
-  plugins: [{
+  plugins: [
+    {
     resolve: `gatsby-plugin-styled-components`,
     options: {
     },
