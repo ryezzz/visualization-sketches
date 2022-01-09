@@ -27,17 +27,17 @@ workbox.core.clientsClaim();
  */
 self.__precacheManifest = [
   {
-    "url": "webpack-runtime-491ff67b0d92290bcd81.js"
+    "url": "webpack-runtime-2f8a904c83b639c3e0ef.js"
   },
   {
     "url": "framework-7357b6dab58473f763f1.js"
   },
   {
-    "url": "app-08f1b81502c0b5bc6bf2.js"
+    "url": "app-44fcb6b4d6aa282d48be.js"
   },
   {
     "url": "offline-plugin-app-shell-fallback/index.html",
-    "revision": "b400ae36a6d8c47fadf3f25682f302f8"
+    "revision": "13f373f9ad0e57ed5e98ff771d237cc6"
   },
   {
     "url": "component---cache-caches-gatsby-plugin-offline-app-shell-js-b39d944fec15e3bc0224.js"
@@ -48,7 +48,7 @@ self.__precacheManifest = [
   },
   {
     "url": "page-data/app-data.json",
-    "revision": "4f901cbf7510d55d783f490a858366af"
+    "revision": "e36f3880b424b996b503f17b74cd0871"
   },
   {
     "url": "polyfill-743de0596306b5828f30.js"
@@ -68,14 +68,7 @@ self.__precacheManifest = [
     "url": "styles.b961eea22b064efa1970.css"
   },
   {
-    "url": "e8f792cd2761396f1f8d7b9693be4f10248cc49c-c67d5064ae77c3a3abea.js"
-  },
-  {
-    "url": "component---src-pages-childhood-diary-js-127bf84ef900c4798d82.js"
-  },
-  {
-    "url": "page-data/childhood-diary/page-data.json",
-    "revision": "f40901a8dfb4853e175273ecd97f9d32"
+    "url": "0200114aa3f8ae7323c62e7873aaeaa1fe15b270-1faf3c8e7d910a3dde50.js"
   },
   {
     "url": "component---src-pages-childhood-diary-binned-js-3578688a58c77a447b28.js"
@@ -85,6 +78,16 @@ self.__precacheManifest = [
     "revision": "41ca7bea5eb2aeff05d4f08a1ba118ae"
   },
   {
+    "url": "938108f27134c92b4aaef29fce57b35c85a89c6b-1675c62973f1a9f4dc8e.js"
+  },
+  {
+    "url": "component---src-pages-childhood-diary-scatter-scroll-js-834cb06d183f105603fa.js"
+  },
+  {
+    "url": "page-data/childhood-diary-scatter-scroll/page-data.json",
+    "revision": "952370d499de26cae079d95a2fc6bff5"
+  },
+  {
     "url": "component---src-pages-childhood-diary-svg-js-bc77433dae734fdeb719.js"
   },
   {
@@ -92,11 +95,18 @@ self.__precacheManifest = [
     "revision": "00a514a1b79e080105a7b0f1f2a90fa0"
   },
   {
-    "url": "component---src-pages-childhood-diary-swarm-js-5f8c805791959a094af8.js"
+    "url": "component---src-pages-childhood-diary-swarm-js-126ea0b35ced94562fa5.js"
   },
   {
     "url": "page-data/childhood-diary-swarm/page-data.json",
     "revision": "e7435232d5a4e75530298fa1be6e0571"
+  },
+  {
+    "url": "component---src-pages-childhood-diary-swarm-scroll-js-c888080e671647f3ad57.js"
+  },
+  {
+    "url": "page-data/childhood-diary-swarm-scroll/page-data.json",
+    "revision": "21d9ce47e2a9aed18f1d5c2e6376538d"
   },
   {
     "url": "component---src-pages-index-js-8d3b1a2cb7150fe5a32b.js"
@@ -195,7 +205,7 @@ const navigationRoute = new NavigationRoute(async ({ event }) => {
   // Check for resources + the app bundle
   // The latter may not exist if the SW is updating to a new version
   const resources = await idbKeyval.get(`resources:${pathname}`)
-  if (!resources || !(await caches.match(`/visualization-sketches/app-08f1b81502c0b5bc6bf2.js`))) {
+  if (!resources || !(await caches.match(`/visualization-sketches/app-44fcb6b4d6aa282d48be.js`))) {
     return await fetch(event.request)
   }
 
