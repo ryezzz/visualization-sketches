@@ -75,7 +75,9 @@ const ScrollySwarm = (props) => {
         "0 3px 6px rgba(0, 0, 0, 0.3), 0 3px 6px rgba(0, 0, 0, 0.4)"
       )
       .style("opacity", 0)
-      .style("padding", "5px");
+      .style("padding", "5px")
+      .style("z-index", 1000000);
+
 
   function showTooltip(tooltipX, tooltipY, readableValue, readableDate, readableFullDate) {
     isBrowser() &&
@@ -83,8 +85,8 @@ const ScrollySwarm = (props) => {
         .style("opacity", 0.7)
         .style("display", "block")
         .style("top", tooltipY + "px")
-        .style("left", tooltipX + 20 + "px")
-        .style("z-index", 5)
+        .style("left", tooltipX +30 -margin+ "px")
+        .style("z-index", 500000)
         .html(
          `<div class ="swarmTooltipText">
           <div>words written: <b>${readableValue}</b></div>
@@ -121,7 +123,7 @@ const ScrollySwarm = (props) => {
     // ***********************************************************
 
     const update = () => {
-      context.fillStyle = "rgb(226, 255, 255)";
+      context.fillStyle = "rgb(226, 99, 255)";
       context.strokeStyle = "rgb(226, 99, 255)";
 
       const animation = () =>
@@ -175,9 +177,6 @@ const ScrollySwarm = (props) => {
 
     const pointHoverIn = (hoverActive) => {
 
-      console.log("hoveractive", hoverActive)
-
-
       let xSelection = hoverActive.x - margin;
 
       let ySelection = hoverActive.y;
@@ -186,7 +185,7 @@ const ScrollySwarm = (props) => {
         .attr("r", hoverActive.r + .5)
         .attr("cx", xSelection)
         .attr("cy", height - ySelection )
-        .attr("fill", "rgba(226, 99, 255,1)");
+        .attr("fill", "rgba(255, 255, 255,1)");
     };
 
     const pointHoverOut = () => {
