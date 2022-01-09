@@ -5,10 +5,12 @@ import * as d3 from "d3";
 import React from "react";
 import { gsap } from "gsap";
 import { isBrowser } from "../../utils/staticRendering";
-
+import beeswarm from "../CanvasBeeswarm"
+import { select } from "d3";
 
 const Veroni = (props) => {
   // const [pixelRatio, setPixelRatio] = useState(2);
+
   const pixelRatio = props.pixelRatio;
 
   const destinationParticles = [];
@@ -46,6 +48,30 @@ const Veroni = (props) => {
     .range([height - margin, marginTop])
     .nice();
 
+
+
+   let dataForDotPlot = d3
+    .bin()
+    .value((d) => d.x)
+    .thresholds(20);
+
+
+//************************************************************
+// ***** ClusterForceScales
+// ***********************************************************
+
+
+    let xScaleBee =
+    d3.scaleOrdinal()
+    .domain(d3.extent(particles, (d) => d[props.dateSelection]))
+    .range([100, 200, 300, 400, 500, 600, 7]);
+    // let yScaleBee = d3
+    // .scaleLinear().domain(d3.extent(particles.map((d) => + d[props.valueSelection])))
+    // .range([height - 50, 50]); // using 50 just to provide some margin at the top and bottom
+//************************************************************
+// ***** End ClusterForceScales
+// ***********************************************************
+
   const animatedParticles = () =>
     props.particles.map((d) => {
       destinationParticles.push({
@@ -62,6 +88,9 @@ const Veroni = (props) => {
         id: d.id,
       });
     });
+
+
+
 
   const tooltip = isBrowser() && d3.select("#tooltipDiv")
     .style("background-color", "white")
@@ -110,41 +139,55 @@ const Veroni = (props) => {
     .ticks(5)
     .tickFormat((d) => `${d}`);
 
-  // d3.select(axisRef.current).call(xAxis);
-  animatedParticles();
 
+
+  animatedParticles();
+  let yScaleBee = d3
+  .scaleLinear()
+  .domain(d3.extent(destinationParticles, (d) => d.y))
+  .range([0, radius])
+  .nice();
 
   useEffect(() => {
-    // animatedParticles();
 
+
+//************************************************************
+// ***** Scale Canvas and prep
+// ***********************************************************
     const canvas = ref.current;
     const context = canvas.getContext("2d");
     context.scale(pixelRatio, pixelRatio);
     context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
     context.globalAlpha = .4;
-    // END SCALE CANVAS
+//************************************************************
+// ***** End Scale Canvas and prep
+// ***********************************************************
+
 
     const update = () => {
-      // context.clearRect(0, 0, width, height);
-      // const animatedParticle = (particle, xSelection, scale) => scale (particle[xSelection],xSelection)(particle[xSelection],xSelection)
-      // const animatedParticleY = (particle, scale) => scale (particle,particle)
+      context.fillStyle = "rgb(226, 99, 255)";
+      context.strokeStyle = "rgb(226, 99, 255)";
 
-      // Animate
-      gsap.fromTo(
+
+      const animation = ()=> gsap.fromTo(
         originParticles,
         {
           x: (index) => originParticles[index].x,
           y: (index) => originParticles[index].y,
+
         },
         {
           x: (index) => destinationParticles[index].x,
           y: (index) => destinationParticles[index].y,
           // ease: "power.3.out",
-          duration: .8,
-          // delay: .001,
+          duration: .5,
+
+
           // Documentation: https://greensock.com/docs/v3/Staggers
           ease: "strong.inOut",
+          // runBackwards: true,
           onUpdate: animate,
+
           stagger: {
             each: .0005,
             from: "random",
@@ -153,17 +196,19 @@ const Veroni = (props) => {
         }
       );
 
-      context.fillStyle = "rgb(226, 99, 255)";
-      context.strokeStyle = "rgb(226, 99, 255)";
+     animation()
+
 
 
       function animate() {
+        context.restore()
+
         context.clearRect(0, 0, width, height);
 
         d3.select(axisRef.current).call(xAxis).transition();
         context.beginPath();
         originParticles.map(
-          (d) => (
+          (d, i) => (
             context.beginPath(),
             context.arc(d.x, d.y, radius, 0, 2 * Math.PI),
             // context.stroke()
@@ -171,9 +216,60 @@ const Veroni = (props) => {
           )
         );
       }
+
+
+      // cy={-8 * i}
+
+//************************************************************
+// *****  clusterforce experiment
+// ***********************************************************
+
+function animateForce() {
+
+  context.clearRect(0, 0, width, height);
+
+  // d3.select(axisRef.current).call(xAxis).transition();
+  context.save()
+  context.beginPath();
+  originParticles.map(
+    (d) => (
+      context.beginPath(),
+      context.arc(d.x, d.y, yScaleBee(d.y), 0, 2 * Math.PI),
+      // context.stroke(),
+      context.fill()
+    ),
+  );
+}
+
+      const runSimulation=()=> {
+        // newNodes = nodes.map(({x0, y0, ...rest}) =>({x: x0, y: y0, ...rest}));
+        d3.forceSimulation(originParticles)
+          .force("x", d3.forceX().x(d => xScaleBee(d.x)).strength(2))
+          // .force("y", d3.forceY().y(d=> d.y).strength(0))
+
+          .force("collide",
+          d3.forceManyBody().strength(.1))
+          .force('collision', d3.forceCollide().radius(d => yScaleBee(d.y + (d.y * .3)))
+          .strength(1))
+          .on("tick", animateForce)
+      }
+
+
+       props.dateSelection==="week" && runSimulation()
+
+//************************************************************
+//***** End Functioning clusterforce experiment
+//************************************************************
+
+
     };
 
+
+
+
+
     onscroll = (event) => {
+
       pointHoverOut();
     };
 
@@ -234,6 +330,7 @@ const Veroni = (props) => {
     };
 
     update();
+
   }, [props.dateSelection, props.width, props.height, props.pixelRatio]);
 
   if (isBrowser()===false) {
@@ -241,7 +338,6 @@ const Veroni = (props) => {
   }
   return (
     <div className="canvasStickyChartContainer">
-
 
       <div
         id="tooltipDiv"
@@ -271,7 +367,7 @@ const Veroni = (props) => {
         valueSelection={props.valueSelection}
         margin={props.margin}
       />
-      <svg className="canvasStickyChartAxis">
+      <svg style={{top: props.height - 1}}className="canvasStickyChartAxis">
         <g className="darkModeAxis" ref={axisRef}></g>
       </svg>
     </div>

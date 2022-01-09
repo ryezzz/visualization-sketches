@@ -3,6 +3,17 @@ import React from "react";
 
 
 export const scatterScrollingtext = (scrollLocation) => {
+  if (scrollLocation === 3) {
+    return {
+      title: (
+        <>
+          Diary Entries by <b>week</b>
+        </>
+      ),
+      date_selection: "weekStacked",
+    };
+  }
+
   if (scrollLocation === 2) {
     return {
       title: (
@@ -39,12 +50,14 @@ export const scatterScrollingtext = (scrollLocation) => {
   return {
     title: (
       <>
-        Diary Entries by <b>year</b>
       </>
     ),
-    date_selection: "year",
+    date_selection: "",
   };
 };
+
+
+
 
 
 export const formatDataFunct = (dataElem) => {
@@ -59,6 +72,7 @@ export const formatDataFunct = (dataElem) => {
       year: new Date(d.formatted_date).getFullYear(),
       quarter: new Date(d.formatted_date).getFullYear(),
       week: new Date(d.formatted_date).getDay(),
+      weekStacked: new Date(d.formatted_date).getDay(),
       radius: 20,
       formatted_date: new Date(d.formatted_date),
     };
