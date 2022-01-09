@@ -27,17 +27,17 @@ workbox.core.clientsClaim();
  */
 self.__precacheManifest = [
   {
-    "url": "webpack-runtime-0f55732d049b4902edf9.js"
+    "url": "webpack-runtime-65427ef39f07151eba26.js"
   },
   {
     "url": "framework-7357b6dab58473f763f1.js"
   },
   {
-    "url": "app-8385b515e6ef3b31b0b5.js"
+    "url": "app-bb392110eb785f993632.js"
   },
   {
     "url": "offline-plugin-app-shell-fallback/index.html",
-    "revision": "b2b04d9af2f180b9eb807df05a804497"
+    "revision": "3544b1253eb8f464763b59eca9be07e7"
   },
   {
     "url": "component---cache-caches-gatsby-plugin-offline-app-shell-js-b39d944fec15e3bc0224.js"
@@ -48,7 +48,7 @@ self.__precacheManifest = [
   },
   {
     "url": "page-data/app-data.json",
-    "revision": "47064481468f86597d68b6e07e316583"
+    "revision": "c13c1feb2396b4bcbd0f712ac58cca41"
   },
   {
     "url": "polyfill-743de0596306b5828f30.js"
@@ -68,11 +68,35 @@ self.__precacheManifest = [
     "url": "styles.b961eea22b064efa1970.css"
   },
   {
-    "url": "component---src-pages-childhood-diary-js-14537b84da5ac3b3cdf3.js"
+    "url": "e8f792cd2761396f1f8d7b9693be4f10248cc49c-c67d5064ae77c3a3abea.js"
+  },
+  {
+    "url": "component---src-pages-childhood-diary-js-127bf84ef900c4798d82.js"
   },
   {
     "url": "page-data/childhood-diary/page-data.json",
     "revision": "f40901a8dfb4853e175273ecd97f9d32"
+  },
+  {
+    "url": "component---src-pages-childhood-diary-binned-js-f3258e1db7bdd3e68373.js"
+  },
+  {
+    "url": "page-data/childhood-diary-binned/page-data.json",
+    "revision": "41ca7bea5eb2aeff05d4f08a1ba118ae"
+  },
+  {
+    "url": "component---src-pages-childhood-diary-svg-js-bc77433dae734fdeb719.js"
+  },
+  {
+    "url": "page-data/childhood-diary-svg/page-data.json",
+    "revision": "00a514a1b79e080105a7b0f1f2a90fa0"
+  },
+  {
+    "url": "component---src-pages-childhood-diary-swarm-js-da9ad96915b7f3b9952f.js"
+  },
+  {
+    "url": "page-data/childhood-diary-swarm/page-data.json",
+    "revision": "e7435232d5a4e75530298fa1be6e0571"
   },
   {
     "url": "component---src-pages-index-js-8d3b1a2cb7150fe5a32b.js"
@@ -171,7 +195,7 @@ const navigationRoute = new NavigationRoute(async ({ event }) => {
   // Check for resources + the app bundle
   // The latter may not exist if the SW is updating to a new version
   const resources = await idbKeyval.get(`resources:${pathname}`)
-  if (!resources || !(await caches.match(`/visualization-sketches/app-8385b515e6ef3b31b0b5.js`))) {
+  if (!resources || !(await caches.match(`/visualization-sketches/app-bb392110eb785f993632.js`))) {
     return await fetch(event.request)
   }
 
