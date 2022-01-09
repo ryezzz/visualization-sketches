@@ -42,7 +42,7 @@ const ChildhoodDiarySwarmed= ({ data }) => {
     .scaleLinear()
     // .domain(d3.extent(binnedData(formattedData), (d, i) => console.log("testingxscale", d),  d.week))
     // .domain(d3.extent(binnedData(formattedData), (d, i) => d.map((di,ii)=>di.entry_word_count)))
-    .domain(d3.extent(formattedData, (d)=> d.entry_word_count))
+    .domain(d3.extent(formattedData, (d,i)=> i))
     .range([1, 10])
 
     let yScale = d3
@@ -86,11 +86,11 @@ const ChildhoodDiarySwarmed= ({ data }) => {
 
           {d.map((di, ii) => (
             <circle
-              r={rScale(di.entry_word_count)}
+              r={height/160}
               fill="white"
               cx={(di.week, xScale(di.week))}
               // cy={}
-              cy={ii * -7}
+              cy={ii * height/-80}
 
 
             ></circle>
