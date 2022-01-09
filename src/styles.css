@@ -70,6 +70,14 @@ html {
   bottom: .5;
 }
 
+.swarmTooltipText{
+  font-size: 12px;
+}
+
+.swarmTooltipContainer{
+max-width: 20px;
+}
+
 
 
 

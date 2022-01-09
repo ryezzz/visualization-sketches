@@ -55,7 +55,7 @@ const ScrollySwarmPage = ({ data }) => {
           dateSelection={scatterScrollingtext(currentStepIndex).date_selection}
           valueSelection="entry_word_count"
           stepIndex={currentStepIndex}
-          margin={10}
+          margin={45}
           marginLeft={currentWidth * 0.1}
           marginTop={currentHeight * 0.7}
           pixelRatio={pixelRatio}
@@ -67,7 +67,7 @@ const ScrollySwarmPage = ({ data }) => {
             onStepEnter={onStepEnter}
             debug={false}
           >
-            {[0, 1, 2, 3].map((_, stepIndex) => (
+            {[0, 1, 2].map((_, stepIndex) => (
               <Step data={stepIndex} key={stepIndex}>
                 <div
                   style={{ opacity: currentStepIndex === stepIndex ? 1 : 0.2 }}

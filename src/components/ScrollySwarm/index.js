@@ -69,25 +69,28 @@ const ScrollySwarm = (props) => {
     d3
       .select("#tooltipDiv")
       .style("background-color", "white")
-      .style("border", "1px solid")
       .style("border-radius", "2px")
       .style(
         "box-shadow",
         "0 3px 6px rgba(0, 0, 0, 0.3), 0 3px 6px rgba(0, 0, 0, 0.4)"
       )
       .style("opacity", 0)
-      .style("padding", "10px");
+      .style("padding", "5px");
 
-  function showTooltip(tooltipX, tooltipY, tooltipZ, xScalei, yScalei) {
+  function showTooltip(tooltipX, tooltipY, readableValue, readableDate, readableFullDate) {
     isBrowser() &&
       tooltip
         .style("opacity", 0.7)
         .style("display", "block")
-        .style("top", yScalei + "px")
-        .style("left", xScalei + 15 + "px")
+        .style("top", tooltipY + "px")
+        .style("left", tooltipX + 20 + "px")
         .style("z-index", 5)
         .html(
-          `<div>word_count: <b>${tooltipY}</b></div><div>${props.dateSelection}: <b>${tooltipX}</b></div>  <div></div>`
+         `<div class ="swarmTooltipText">
+          <div>words written: <b>${readableValue}</b></div>
+          <div>${props.dateSelection}: <b>${readableDate}</b></div>
+          <div><b>${readableFullDate}</b></div>
+          </div>`
         );
   }
 
@@ -97,7 +100,7 @@ const ScrollySwarm = (props) => {
   const xAxisScale = d3
     .scaleSequential()
     .domain(d3.extent(particles, (d) => d[props.dateSelection]))
-    .range([marginLeft, width - margin]);
+    .range([margin, width - margin]);
 
   const xAxis = d3
     .axisBottom(xAxisScale)
@@ -112,13 +115,13 @@ const ScrollySwarm = (props) => {
     const context = canvas.getContext("2d");
     context.scale(pixelRatio, pixelRatio);
     context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-    context.globalAlpha = 0.4;
+    context.globalAlpha = .8;
     //************************************************************
     // ***** End Scale Canvas and prep
     // ***********************************************************
 
     const update = () => {
-      context.fillStyle = "rgb(226, 99, 255)";
+      context.fillStyle = "rgb(226, 255, 255)";
       context.strokeStyle = "rgb(226, 99, 255)";
 
       const animation = () =>
@@ -158,7 +161,7 @@ const ScrollySwarm = (props) => {
         dodgedParticlesOrigin.map(
           (d, i) => (
             context.beginPath(),
-            context.arc(d.x, height - d.y, d.r, 0, 2 * Math.PI),
+            context.arc(d.x-margin, height - d.y, d.r, 0, 2 * Math.PI),
             // context.stroke()
             context.fill()
           )
@@ -175,17 +178,15 @@ const ScrollySwarm = (props) => {
       console.log("hoveractive", hoverActive)
 
 
-      let xSelection = hoverActive.x;
+      let xSelection = hoverActive.x - margin;
 
       let ySelection = hoverActive.y;
-      const pageYoffset = isBrowser() ? window.pageYOffset : 0;
 
       d3.select(highlightRef.current)
-        .attr("r", hoverActive.r)
+        .attr("r", hoverActive.r + .5)
         .attr("cx", xSelection)
         .attr("cy", height - ySelection )
-        .attr("fill", "rgba(255,255,255,.7)");
-      // .attr("stroke", "rgba(255,255,255, 1)");
+        .attr("fill", "rgba(226, 99, 255,1)");
     };
 
     const pointHoverOut = () => {
@@ -198,10 +199,11 @@ const ScrollySwarm = (props) => {
     }
     onmousemove = (event) => {
       event.preventDefault();
-      const pageYoffset = isBrowser() ? window.pageYOffset : 0;
+      const pageYoffset = window.pageYOffset;
+      console.log("offset", pageYoffset)
       let mousePoint = d3.pointer(event, this);
-      let xi = mousePoint[0];
-      let y = height - mousePoint[1] - [pageYoffset];
+      let xi = mousePoint[0] +  margin;
+      let y = height - mousePoint[1] + pageYoffset;
       let heightCond = xi < width;
       let index = delaunay2(props.dateSelection).find(xi, y);
       console.log(index)
@@ -209,15 +211,19 @@ const ScrollySwarm = (props) => {
       console.log(indexObj)
       let tooltipX = indexObj.x;
       let tooltipY = height - indexObj.y;
-      let tooltipZ = indexObj.r;
+      let tooltipLegibleValue = indexObj.data[props.valueSelection];
+      let tooltipLegibleSelectedDate = indexObj.data[props.dateSelection];
+      let tooltipLegibleDate = indexObj.data.date;
+
+
 
       heightCond
         ? showTooltip(
             tooltipX,
             tooltipY,
-            tooltipZ,
-            tooltipX,
-            tooltipY
+            tooltipLegibleValue,
+            tooltipLegibleSelectedDate,
+            tooltipLegibleDate
           )
         : hideTooltip(indexObj);
 
