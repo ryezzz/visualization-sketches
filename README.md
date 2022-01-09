@@ -1,4 +1,4 @@
-These are experiments for data design and experience discovery. As of 2022 they are base on a t[ext analysis of my childhood diary](https://ryez.design/portfolio/journal).
+These are experiments for data design and experience discovery. As of 2022 they are base on a [text analysis of my childhood diary](https://ryez.design/portfolio/journal).
 
 
 [Childhood diary scrolly](https://ryezzz.github.io/visualization-sketches/childhood-diary) 
