@@ -137,7 +137,7 @@ const ScrollySwarm = (props) => {
             x: (index) => dodgedParticlesDestination[index].x,
             y: (index) => dodgedParticlesDestination[index].y,
             // ease: "power.3.out",
-            duration: 0.5,
+            duration: 1,
 
             // Documentation: https://greensock.com/docs/v3/Staggers
             ease: "strong.inOut",
