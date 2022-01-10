@@ -2,7 +2,7 @@ These are experiments for data design and experience discovery. As of 2022 they 
 
 [Scrolling beeswarm](https://ryezzz.github.io/visualization-sketches/childhood-diary-swarm-scroll) 
 
-<img width="529" alt="Screen Shot 2022-01-09 at 5 19 59 PM" src="https://user-images.githubusercontent.com/15457713/148703439-251a05a5-b0fe-4baa-b747-98eccdf276d4.png">
+[<img width="529" alt="Screen Shot 2022-01-09 at 5 19 59 PM" src="https://user-images.githubusercontent.com/15457713/148703439-251a05a5-b0fe-4baa-b747-98eccdf276d4.png">](https://ryezzz.github.io/visualization-sketches/childhood-diary-swarm-scroll) 
 
 
 [Basic svg beeswarm](https://ryezzz.github.io/visualization-sketches/childhood-diary-swarm) 
