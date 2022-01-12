@@ -1,18 +1,30 @@
-import React, { useState } from "react";
+import React, { useRef, createRef, useState } from "react";
 import ScrollySwarm from "../components/ScrollySwarm";
 import { useScrollData } from "scroll-data-hook";
 import debounce from "debounce";
+import { Link } from "gatsby"
+import { useScrollRestoration } from "gatsby"
 import { Scrollama, Step } from "react-scrollama";
 import { graphql } from "gatsby";
 import "../styles.css";
 import { isBrowser } from "../utils/staticRendering";
-import { scatterScrollingtext } from "../utils/childhoodDiaryUtils";
+import { scatterScrollingtextSwarm } from "../utils/childhoodDiaryUtils";
 import { formatDataFunct } from "../utils/childhoodDiaryUtils";
 // import * as Scroll from 'react-scroll';
 
 const ScrollySwarmPage = ({ data }) => {
   const diaryRawData = data.allDataCsv.edges[0].node.items;
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+
+
+  const scrollOrder = ["year", "month", "week","year", "year", "month", "week", "year"]
+
+  const stepRefs = useRef([]);
+  stepRefs.current = scrollOrder.map((element, i) => stepRefs.current[i] ?? createRef(element));
+  function handleBackClick() {
+    stepRefs.current.scrollIntoView({ behavior: "smooth" });
+  }
+
+  const [currentSelectedTime, setCurrentSelectedTime] = useState(null);
   const [pixelRatio, setPixelRatio] = useState(
     isBrowser() ? window.devicePixelRatio : 0
   );
@@ -22,8 +34,9 @@ const ScrollySwarmPage = ({ data }) => {
   const [currentHeight, setCurrentHeight] = useState(
     isBrowser() ? window.innerHeight : 0
   );
+
   const onStepEnter = (stepdata) => {
-    setCurrentStepIndex(stepdata.data);
+    setCurrentSelectedTime(stepdata.data);
   };
 
   React.useEffect(() => {
@@ -31,7 +44,7 @@ const ScrollySwarmPage = ({ data }) => {
       setCurrentWidth(window.innerWidth);
       setCurrentHeight(window.innerHeight);
       setPixelRatio(window.devicePixelRatio);
-      window.onresize = function (event) {
+      window.onresize = function () {
         setCurrentWidth(window.innerWidth);
         setCurrentHeight(window.innerHeight);
         setPixelRatio(window.devicePixelRatio);
@@ -44,17 +57,19 @@ const ScrollySwarmPage = ({ data }) => {
   }
 
   return (
-    <div>
+    <div className={"scrollySwarmContainer"}>
       <div>
         <ScrollySwarm
-          className={"staticGraphicContainer"}
+          className={"staticGraphicContainer scrollySwarmContainer"}
           height={currentHeight * 0.95}
           width={currentWidth * 0.6}
           particles={formatDataFunct(diaryRawData)}
           useScrollData={useScrollData}
-          dateSelection={scatterScrollingtext(currentStepIndex).date_selection}
+          dateSelection={
+            scatterScrollingtextSwarm(currentSelectedTime).date_selection
+          }
           valueSelection="entry_word_count"
-          stepIndex={currentStepIndex}
+          stepIndex={currentSelectedTime}
           margin={45}
           marginLeft={currentWidth * 0.1}
           marginTop={currentHeight * 0.7}
@@ -62,18 +77,16 @@ const ScrollySwarmPage = ({ data }) => {
         />
 
         <div className="scrollingTextContainer darkModeScrollingTitle">
-          <Scrollama
-            offset={.5}
-            onStepEnter={onStepEnter}
-            debug={false}
-          >
-            {[0, 1, 2].map((_, stepIndex) => (
-              <Step data={stepIndex} key={stepIndex}>
-                <div
-                  style={{ opacity: currentStepIndex === stepIndex ? 1 : 0.2 }}
-                  class="textStep"
+          <Scrollama offset={0.5} onStepEnter={onStepEnter} debug={false}>
+            {scrollOrder.map((selectedTime, index) => (
+              <Step data={selectedTime}>
+                <div ref={stepRefs.current[index]} id={selectedTime}
+                  style={{
+                    opacity: currentSelectedTime === selectedTime ? 1 : 0.2,
+                  }}
+                  class="textStep scrollySwarmTextStep"
                 >
-                  {scatterScrollingtext(stepIndex).title}
+                  {scatterScrollingtextSwarm(selectedTime).title}
                 </div>
               </Step>
             ))}
@@ -101,4 +114,4 @@ export const query = graphql`
   }
 `;
 
-export default ScrollySwarmPage
+export default ScrollySwarmPage;

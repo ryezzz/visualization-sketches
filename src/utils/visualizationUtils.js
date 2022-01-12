@@ -1,7 +1,7 @@
 export const dodge = (data, selectedDateI, selectedValueI, xScaleI, rScaleI, paddingI) => {
   const circles = data
     .map((d) => ({ x: xScaleI(d[selectedDateI]), r: rScaleI(d[selectedValueI]), data: d }))
-    // .sort((a, b) => b.r - a.r);
+    .sort((b, a) => b.data.formatted_date - a.data.formatted_date);
 
   const epsilon = 1e-3;
   let head = null,
