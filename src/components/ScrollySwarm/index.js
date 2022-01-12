@@ -8,12 +8,7 @@ import { isBrowser } from "../../utils/staticRendering";
 import { dodge } from "../../utils/visualizationUtils";
 
 const ScrollySwarm = (props) => {
-  // const [pixelRatio, setPixelRatio] = useState(2);
-
   const pixelRatio = props.pixelRatio;
-
-  const destinationParticles = [];
-  const originParticles = [];
   let height = props.height;
   let width = props.width;
   let margin = props.margin;
@@ -23,7 +18,14 @@ const ScrollySwarm = (props) => {
   let ref = useRef();
   let highlightRef = useRef();
   let axisRef = useRef();
-  const radius = 8;
+  let circleColor = "rgba(0,0,255,.7)"
+  let circleHighlightColor = "rgb(255,255,255)"
+  let strokeColor = "rgba(0,0,0,0)"
+  let globalOpacity = 1
+  let animationDuration = 1
+  let lineWidth = 1.4;
+  let padding = lineWidth
+
   ////MOVE TO HOOKS
   const usePrevious = (value, defaultRef) => {
     const ref = useRef(defaultRef);
@@ -33,14 +35,15 @@ const ScrollySwarm = (props) => {
     return ref.current;
   };
 
-  const prevDate = usePrevious(props.dateSelection, "year");
+  const prevDate = usePrevious(props.dateSelection, "");
 
   let rScale = d3
     .scaleLinear()
     .domain(d3.extent(particles, (d) => d[props.valueSelection]))
     .range([1, height / 80]);
 
-  let x = (incomingData, prevOrCurrent) => d3
+  let x = (incomingData, prevOrCurrent) =>
+    d3
       .scaleSequential()
       .domain(d3.extent(particles, (d) => d[prevOrCurrent]))
       .range([marginLeft, width - 0]);
@@ -53,7 +56,7 @@ const ScrollySwarm = (props) => {
     props.valueSelection,
     x(particles, prevDate),
     r,
-    0
+    padding
   );
   const dodgedParticlesDestination = dodge(
     particles,
@@ -61,7 +64,7 @@ const ScrollySwarm = (props) => {
     props.valueSelection,
     x(particles, props.dateSelection),
     r,
-    0
+    padding
   );
 
   const tooltip =
@@ -78,17 +81,22 @@ const ScrollySwarm = (props) => {
       .style("padding", "5px")
       .style("z-index", 1000000);
 
-
-  function showTooltip(tooltipX, tooltipY, readableValue, readableDate, readableFullDate) {
+  function showTooltip(
+    tooltipX,
+    tooltipY,
+    readableValue,
+    readableDate,
+    readableFullDate
+  ) {
     isBrowser() &&
       tooltip
         .style("opacity", 0.7)
         .style("display", "block")
         .style("top", tooltipY + "px")
-        .style("left", tooltipX +30 -margin+ "px")
+        .style("left", tooltipX + 30 - margin + "px")
         .style("z-index", 500000)
         .html(
-         `<div class ="swarmTooltipText">
+          `<div class ="swarmTooltipText">
           <div>words written: <b>${readableValue}</b></div>
           <div>${props.dateSelection}: <b>${readableDate}</b></div>
           <div><b>${readableFullDate}</b></div>
@@ -117,14 +125,19 @@ const ScrollySwarm = (props) => {
     const context = canvas.getContext("2d");
     context.scale(pixelRatio, pixelRatio);
     context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-    context.globalAlpha = .8;
+    context.globalAlpha = globalOpacity;
+    context.lineWidth = lineWidth;
+    context.fillStyle = circleColor;
+
     //************************************************************
     // ***** End Scale Canvas and prep
     // ***********************************************************
 
     const update = () => {
-      context.fillStyle = "rgb(226, 99, 255)";
-      context.strokeStyle = "rgb(226, 99, 255)";
+      // context.fillStyle = "rgb(226, 99, 255)";
+      // context.fillStyle = "rgb(65, 82, 158, 0.2)";
+
+      context.strokeStyle = strokeColor;
 
       const animation = () =>
         gsap.fromTo(
@@ -137,7 +150,7 @@ const ScrollySwarm = (props) => {
             x: (index) => dodgedParticlesDestination[index].x,
             y: (index) => dodgedParticlesDestination[index].y,
             // ease: "power.3.out",
-            duration: 1,
+            duration: animationDuration,
 
             // Documentation: https://greensock.com/docs/v3/Staggers
             ease: "strong.inOut",
@@ -163,8 +176,8 @@ const ScrollySwarm = (props) => {
         dodgedParticlesOrigin.map(
           (d, i) => (
             context.beginPath(),
-            context.arc(d.x-margin, height - d.y, d.r, 0, 2 * Math.PI),
-            // context.stroke()
+            context.arc(d.x - margin, height - d.y, d.r, 0, 2 * Math.PI),
+            context.stroke(),
             context.fill()
           )
         );
@@ -176,16 +189,17 @@ const ScrollySwarm = (props) => {
     };
 
     const pointHoverIn = (hoverActive) => {
-
       let xSelection = hoverActive.x - margin;
 
       let ySelection = hoverActive.y;
 
       d3.select(highlightRef.current)
-        .attr("r", hoverActive.r + .5)
+        .attr("r", hoverActive.r + 1)
         .attr("cx", xSelection)
-        .attr("cy", height - ySelection )
-        .attr("fill", "rgba(255, 255, 255,1)");
+        .attr("cy", height - ySelection)
+        .attr("fill", circleHighlightColor)
+        .attr("stroke", circleColor);
+
     };
 
     const pointHoverOut = () => {
@@ -196,25 +210,21 @@ const ScrollySwarm = (props) => {
       isBrowser && tooltip.style("display", "none");
       isBrowser && tooltip.style("opacity", "0");
     }
+
     onmousemove = (event) => {
       event.preventDefault();
       const pageYoffset = window.pageYOffset;
-      console.log("offset", pageYoffset)
       let mousePoint = d3.pointer(event, this);
-      let xi = mousePoint[0] +  margin;
+      let xi = mousePoint[0] + margin;
       let y = height - mousePoint[1] + pageYoffset;
-      let heightCond = xi < width;
+      let heightCond = xi < width + margin;
       let index = delaunay2(props.dateSelection).find(xi, y);
-      console.log(index)
       let indexObj = dodgedParticlesDestination[index];
-      console.log(indexObj)
       let tooltipX = indexObj.x;
       let tooltipY = height - indexObj.y;
       let tooltipLegibleValue = indexObj.data[props.valueSelection];
       let tooltipLegibleSelectedDate = indexObj.data[props.dateSelection];
       let tooltipLegibleDate = indexObj.data.date;
-
-
 
       heightCond
         ? showTooltip(
@@ -232,11 +242,8 @@ const ScrollySwarm = (props) => {
     update();
   }, [props.dateSelection, props.width, props.height, props.pixelRatio]);
 
-  if (isBrowser() === false) {
-    return <></>;
-  }
   return (
-    <div className="canvasStickyChartContainer">
+    <div className="canvasStickyChartContainer scrollySwarmContainer">
       <div id="tooltipDiv" className="tooltipDiv" />
 
       <svg className="canvasStickyPointHighlight" width={width} height={height}>
@@ -259,7 +266,7 @@ const ScrollySwarm = (props) => {
         margin={props.margin}
       />
       <svg style={{ top: props.height - 1 }} className="canvasStickyChartAxis">
-        <g className="darkModeAxis" ref={axisRef}></g>
+        <g className="lightModeAxis" ref={axisRef}></g>
       </svg>
     </div>
   );

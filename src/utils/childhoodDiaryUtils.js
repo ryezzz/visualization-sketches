@@ -80,3 +80,66 @@ export const formatDataFunct = (dataElem) => {
   });
   return diaryFormattedData;
 };
+
+
+
+
+export const scatterScrollingtextSwarm = (scrollLocation) => {
+  // if (scrollLocation === 3) {
+  //   return {
+  //     title: (
+  //      <div>
+  //         <div>Diary Entries by <b>weeks</b></div>
+  //         <div>I tend to write more on Saturdays</div>
+  //       </div>
+  //     ),
+  //     date_selection: "weekStacked",
+  //   };
+  // }
+
+  if (scrollLocation === "week") {
+    return {
+        title: (
+          <div>
+             <div>Diary Entries by <b>weeks</b></div>
+             <div>I tend to write more on Saturdays</div>
+             <div>I tend to write more on Saturdays</div>
+
+           </div>
+
+      ),
+      date_selection: "week",
+    };
+  }
+
+  if (scrollLocation === "month") {
+    return {
+      title: (
+        <>
+          Diary Entries by <b>month</b>
+        </>
+      ),
+      date_selection: "month",
+    };
+  }
+
+  if (scrollLocation === "year") {
+    return {
+      title: (
+        <>
+          Diary Entries by <b>year</b>
+        </>
+      ),
+      date_selection: "year",
+    };
+  }
+
+  return {
+    title: (
+      <>
+      </>
+    ),
+    date_selection: "",
+  };
+};
+

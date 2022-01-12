@@ -80,10 +80,15 @@ max-width: 20px;
 
 
 
+.scrollySwarmContainer{
+background-color: rgb(223, 223, 223);
+}
 
 .textStep{
   background-color: rgba(255, 255, 255, 0.123);
-  border: solid 3px rgba(235, 133, 255, .8);
+  border: solid 4px rgba(0,0,255,.3);
+  /* border: solid 3px rgba(97, 126, 255, 0.8); */
+
   transition: opacity;
   transition-duration: 500ms;
   /* max-height: 100vh; */
@@ -99,6 +104,11 @@ max-width: 20px;
   font-size: 40px;
   margin-top: 40vh;
   margin-bottom: 40vh;
+}
+
+.scrollySwarmTextStep{
+  background-color: rgba(255, 255, 255, 0.712);
+  color: black;
 
 }
 
