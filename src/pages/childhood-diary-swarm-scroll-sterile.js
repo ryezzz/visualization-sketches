@@ -1,5 +1,5 @@
 import React, { useRef, createRef, useState } from "react";
-import ScrollySwarm from "../components/ScrollySwarm";
+import {ScrollSwarmSterile} from "../components/ScrollySwarm";
 import { useScrollData } from "scroll-data-hook";
 import debounce from "debounce";
 import { Link } from "gatsby"
@@ -59,7 +59,7 @@ const ScrollySwarmPage = ({ data }) => {
   return (
     <div className={"scrollySwarmContainer"}>
       <div>
-        <ScrollySwarm
+        <ScrollSwarmSterile
           className={"staticGraphicContainer scrollySwarmContainer"}
           height={currentHeight * 0.95}
           width={currentWidth * 0.6}

@@ -1,4 +1,4 @@
-export const dodge = (data, selectedDateI, selectedValueI, xScaleI, rScaleI, paddingI) => {
+export const dodge = (data, selectedDateI, selectedValueI, xScaleI, rScaleI, paddingI, preRenderFun=null) => {
   const circles = data
     .map((d) => ({ x: xScaleI(d[selectedDateI]), r: rScaleI(d[selectedValueI]), data: d }))
     .sort((b, a) => b.data.formatted_date - a.data.formatted_date);
@@ -23,8 +23,9 @@ export const dodge = (data, selectedDateI, selectedValueI, xScaleI, rScaleI, pad
 
   //   // Place each circle sequentially.
   for (const b of circles) {
+
     //     // Choose the minimum non-intersecting tangent.
-    if (intersects(b.x, (b.y = b.r), b.r)) {
+    if (intersects(b.x, (b.y = b.r ), b.r)) {
       let a = head;
       b.y = Infinity;
       do {
@@ -41,7 +42,13 @@ export const dodge = (data, selectedDateI, selectedValueI, xScaleI, rScaleI, pad
       head = tail = b;
       queue = head;
     } else tail = tail.next = b;
+
+    if (preRenderFun) {b.preRenderedFun=preRenderFun; b.preRendered=preRenderFun(b.x, b.y,b.r) }
+    console.log("PREREND?", b)
+
   }
 
   return circles;
 };
+
+

@@ -23,3 +23,13 @@ export function GetScroll() {
   }, [goingUp]);
   return goingUp ? 'up' : 'down';
 }
+
+
+
+export const usePrevious = (value, defaultRef) => {
+  const ref = useRef(defaultRef);
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
+};
