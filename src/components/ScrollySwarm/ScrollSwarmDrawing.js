@@ -6,7 +6,6 @@ import React from "react";
 import { gsap } from "gsap";
 import { isBrowser } from "../../utils/staticRendering";
 import { dodge } from "../../utils/visualizationUtils";
-import ReactRough, { Rectangle, Arc, Circle } from "react-rough";
 import * as RoughCanvas from "roughjs/bin/canvas";
 import { usePrevious } from "../../hooks/customHooks";
 
@@ -21,9 +20,9 @@ const ScrollySwarmDrawing = (
     width = props.width,
     margin = props.margin,
     marginLeft = props.marginLeft,
-    marginTop = props.marginTop,
+    // marginTop = props.marginTop,
     circleColor = "rgba(0,0,255,.3)",
-    circleHighlightColor = "rgb(255,255,255)",
+    // circleHighlightColor = "rgb(255,255,255)",
     strokeColor = "rgba(0,0,255,1)",
     animationDuration = 0.5,
     lineWidth = 0,
@@ -35,6 +34,7 @@ const ScrollySwarmDrawing = (
   const highlightRef = useRef();
   const axisRef = useRef();
   const prevDate = usePrevious(props.dateSelection, "");
+  const preRenderCanvasRef = useRef()
 
   const rScale = d3
     .scaleLinear()
@@ -49,24 +49,6 @@ const ScrollySwarmDrawing = (
       .range([marginLeft + margin, width]);
 
   const r = (selectedValue) => rScale(selectedValue);
-
-  // const dodgedParticlesOrigin = dodge(
-  //   particles,
-  //   prevDate,
-  //   props.valueSelection,
-  //   xScale(particles, prevDate),
-  //   r,
-  //   padding
-  // );
-
-  // const dodgedParticlesDestination = dodge(
-  //   particles,
-  //   props.dateSelection,
-  //   props.valueSelection,
-  //   xScale(particles, props.dateSelection),
-  //   r,
-  //   padding
-  // );
 
   const tooltip =
     isBrowser() &&
@@ -87,7 +69,7 @@ const ScrollySwarmDrawing = (
         .style("display", "block")
         .style("top", tooltipY + "px")
         .style("left", tooltipX + 30 - margin + "px")
-        .style("z-index", 500000)
+        .style("z-index", 5000000)
         .html(
           `<div class ="swarmTooltipText">
           <div>words written: <b>${readableValue}</b></div>
@@ -117,15 +99,23 @@ const ScrollySwarmDrawing = (
     // ***********************************************************
     const canvas = mainCanvasRef.current;
     const context = canvas.getContext("2d", { alpha: false });
+    const preRenderCanvas = preRenderCanvasRef.current
+    const preRenderContext = preRenderCanvas.getContext("2d");
+    preRenderContext.scale(pixelRatio, pixelRatio);
+    preRenderContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+
+
+
     context.scale(pixelRatio, pixelRatio);
     context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
     context.lineWidth = lineWidth;
     context.fillStyle = circleColor;
+    preRenderContext.fillStyle = circleColor;
     context.strokeStyle = strokeColor;
-    const renderRoughCircle = (cx, cy, diamater, ) =>
+    const renderRoughCircle = (cx, cy, diamater, canvasElem ) =>
 
-    new RoughCanvas.RoughCanvas(canvas).circle(cx, cy, diamater, {
-      roughness: 0.5,
+    new RoughCanvas.RoughCanvas(canvasElem).circle(cx, cy, diamater, {
+      roughness: 0.5, move: 0
     });
 
     const dodgedParticlesOrigin = dodge(
@@ -135,7 +125,6 @@ const ScrollySwarmDrawing = (
       xScale(particles, prevDate),
       r,
       padding,
-      renderRoughCircle
     );
 
     const dodgedParticlesDestination = dodge(
@@ -145,7 +134,6 @@ const ScrollySwarmDrawing = (
       xScale(particles, props.dateSelection),
       r,
       padding,
-      renderRoughCircle
     );
 
     const delaunayPoints = (dateString, x, y) =>
@@ -170,40 +158,30 @@ const ScrollySwarmDrawing = (
             duration: animationDuration,
             // Documentation: https://greensock.com/docs/v3/Staggers
             onUpdate: animate,
-            lazy: false,
-            fps: 1,
-            onInterrupt: "pause",
+            lazy: true,
             stagger: {
               each: 0.001,
               from: "random",
             },
-          }
+
+          },
         );
 
       animation();
 
+
+
+
       function animate() {
+        preRenderContext.clearRect(0, 0, width, height);
         context.clearRect(0, 0, width, height);
+
         d3.select(axisRef.current).call(xAxis);
         dodgedParticlesOrigin.map(
+
           (d) => (
-            d.preRenderedFun (d.x - margin, height - d.y, d.r * 2)
-          )
+         renderRoughCircle(d.x - margin, height - d.y, d.r * 2, canvas)),
         );
-
-
-        // dodgedParticlesOrigin.map(
-        //   (d) => {
-        //     context.beginPath();
-        //     context.fill()
-
-        //     // d.preRenderedFun (d.x - margin, height - d.y, d.r * 2);
-        //     //  console.log("TRYING TO PRERENDER",  d.preRendered),
-        //    return d.preRendered
-        //     // console.log("PRERENDER", d.preRendered),
-        //     // renderRoughCircle(d.x - margin, height - d.y, d.r * 2)
-        //   }
-        // );
       }
     };
 
@@ -212,20 +190,13 @@ const ScrollySwarmDrawing = (
     };
 
     const pointHoverIn = (hoverActive) => {
-      let xSelection = hoverActive.x - margin;
-
-      let ySelection = hoverActive.y;
-
-      d3.select(highlightRef.current)
-        .attr("r", hoverActive.r + 1)
-        .attr("cx", xSelection)
-        .attr("cy", height - ySelection)
-        .attr("fill", circleHighlightColor)
-        .attr("stroke", circleColor);
+      preRenderContext.clearRect(0, 0, width, height);
+      renderRoughCircle(hoverActive.x - margin, height - hoverActive.y, hoverActive.r * 2, preRenderCanvas)
+      preRenderContext.fill()
     };
 
     const pointHoverOut = () => {
-      d3.select(highlightRef.current).attr("r", 0);
+      preRenderContext.clearRect(0, 0, width, height);
     };
 
     function hideTooltip(hoverInactive) {
@@ -289,6 +260,17 @@ const ScrollySwarmDrawing = (
           height: props.height + "px",
         }}
         ref={mainCanvasRef}
+        width={props.width * props.pixelRatio}
+        height={props.height * props.pixelRatio}
+      />
+
+<canvas
+        className={"canvasStickyChart"}
+        style={{
+          width: props.width + "px",
+          height: props.height + "px",
+        }}
+        ref={preRenderCanvasRef}
         width={props.width * props.pixelRatio}
         height={props.height * props.pixelRatio}
       />

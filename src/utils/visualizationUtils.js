@@ -1,4 +1,4 @@
-export const dodge = (data, selectedDateI, selectedValueI, xScaleI, rScaleI, paddingI, preRenderFun=null) => {
+export const dodge = (data, selectedDateI, selectedValueI, xScaleI, rScaleI, paddingI, preRenderFun=false) => {
   const circles = data
     .map((d) => ({ x: xScaleI(d[selectedDateI]), r: rScaleI(d[selectedValueI]), data: d }))
     .sort((b, a) => b.data.formatted_date - a.data.formatted_date);
@@ -43,9 +43,7 @@ export const dodge = (data, selectedDateI, selectedValueI, xScaleI, rScaleI, pad
       queue = head;
     } else tail = tail.next = b;
 
-    if (preRenderFun) {b.preRenderedFun=preRenderFun; b.preRendered=preRenderFun(b.x, b.y,b.r) }
-    console.log("PREREND?", b)
-
+    // if (preRenderFun) {b.preRendered=preRenderFun(b.x, b.y,b.r)}
   }
 
   return circles;
