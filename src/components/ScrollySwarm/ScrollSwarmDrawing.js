@@ -1,154 +1,4 @@
-body {
-  margin: 0;
-  background-color: rgb(26, 26, 26);
-  /* overflow: hidden; */
-
-  /* color: white */
-}
-html {
-  font-family: "bitter";
-  font-weight: 100;
-  /* scroll-behavior: smooth; */
-}
-
-html,
-body {
-  height: 100%;
-}
-
-.darkModeScrollingTitle {
-  color: rgb(202, 202, 202);
-}
-
-.darkModeAxis {
-  color: rgb(177, 177, 177);
-}
-
-
-.scrollingTextContainer {
-  width: 30%;
-  float: right;
-  position: relative;
-  z-index: 0;
-  top: 0.5;
-  bottom: 0.5;
-}
-
-.swarmTooltipText {
-  font-size: 15px;
-}
-
-.swarmTooltipContainer {
-  max-width: 20px;
-}
-
-.scrollySwarmContainerDrawing {
-  background-color: rgb(252, 248, 248);
-  background-size: 20px 20px;
-  height: 100%;
-  width: 100%;
-  background-image: linear-gradient(
-      to right,
-      rgba(0, 0, 0, 0.1),
-      transparent 1px
-    ),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.1), transparent 1px);
-  background-repeat: repeat;
-  overscroll-behavior: hidden;
-}
-
-.scrollySwarmContainerSterile {
-  background-color: rgb(128, 0, 248);
-  background-size: 20px 20px;
-  height: 100%;
-  width: 100%;
-  overscroll-behavior: hidden;
-}
-
-#tooltipDivLight{
-  background-color: white;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3), 0 3px 6px rgba(0, 0, 0, 0.4);
-  padding: 3px;
-  border-radius: 2px;
-}
-
-.textStep {
-  background: rgba(255, 255, 255, 0.705);
-  overflow: hidden;
-  position: relative;
-  padding: 5%;
-  padding-top: 40vh;
-  padding-bottom: 40vh;
-}
-
-.scrollToSelection {
-  filter: drop-shadow(-0.5mm 0mm 1mm rgba(0, 0, 0, 0.3));
-
-  color: white;
-  background-color: white;
-  color: black;
-  /* border: solid 4px rgba(0,0,255, .5); */
-  /* border: solid 3px rgba(97, 126, 255, 0.8); */
-  font-size: 30px;
-  padding: 10px;
-
-  transition: opacity;
-  transition-duration: 500ms;
-}
-
-.scrollySwarmTextStep {
-  background-color: rgba(255, 255, 255, 0);
-  /* color: black; */
-}
-
-@media only screen and (max-width: 400px) {
-  .textStep {
-    margin-top: 40vh;
-    margin-bottom: 40vh;
-    font-size: 20px;
-  }
-}
-.tooltipDiv {
-  position: absolute;
-  pointer-events: "none";
-  float: left;
-  z-index: 300000;
-  min-width: "110px";
-}
-
-.canvasStickyChartContainer {
-  position: fixed;
-  height: 100%;
-  width: 100%;
-}
-.canvasStickyChart {
-  position: absolute;
-  float: left;
-  height: 95%;
-  transition: height;
-  transition-duration: 500ms;
-  z-index: 2;
-}
-
-.canvasStickyPointHighlight {
-  position: absolute;
-  float: left;
-  z-index: 3;
-}
-
-.canvasStickyChartAxis {
-  transition: width;
-  transition-duration: 500ms;
-  position: relative;
-  float: left;
-  z-index: 0;
-  top: 95%;
-  transition: top;
-  transition-duration: 500ms;
-  width: 100%;
-}
-
-/* // To fix canvas blurryness I used this: https://stackoverflow.com/questions/48961797/canvas-circle-looks-blurry
+// To fix canvas blurryness I used this: https://stackoverflow.com/questions/48961797/canvas-circle-looks-blurry
 import { useEffect, useRef } from "react";
 import { Delaunay } from "d3-delaunay";
 import * as d3 from "d3";
@@ -156,13 +6,10 @@ import React from "react";
 import { gsap } from "gsap";
 import { isBrowser } from "../../utils/staticRendering";
 import { dodge } from "../../utils/visualizationUtils";
+import * as RoughCanvas from "roughjs/bin/canvas";
 import { usePrevious } from "../../hooks/customHooks";
 
-import ReactRough, { Rectangle, Arc, Circle } from "react-rough";
-import * as RoughCanvas from "roughjs/bin/canvas";
 // import * as RoughSvgfrom from "roughjs/bin/svg"
-
-console.log("rough", RoughCanvas);
 
 const ScrollySwarmDrawing = (
   props,
@@ -173,70 +20,41 @@ const ScrollySwarmDrawing = (
     width = props.width,
     margin = props.margin,
     marginLeft = props.marginLeft,
-    marginTop = props.marginTop,
+    // marginTop = props.marginTop,
     circleColor = "rgba(0,0,255,.3)",
-    circleHighlightColor = "rgb(255,255,255)",
+    // circleHighlightColor = "rgb(255,255,255)",
     strokeColor = "rgba(0,0,255,1)",
     animationDuration = 0.5,
     lineWidth = 0,
     padding = lineWidth,
   }
 ) => {
-
-  // Refs
-  let canvasMainRef = useRef();
-  let glRef = useRef();
-  let highlightRef = useRef();
-  let axisRef = useRef();
-
-  // Save previous selected date for animation
+  const mainCanvasRef = useRef();
+  const glRef = useRef();
+  const highlightRef = useRef();
+  const axisRef = useRef();
   const prevDate = usePrevious(props.dateSelection, "");
+  const preRenderCanvasRef = useRef()
 
-  // Set up scales. No yxcale because the dodge function be
-  let rScale = d3
+  const rScale = d3
     .scaleLinear()
     .domain(d3.extent(particles, (d) => d[props.valueSelection]))
     .range([1, height / 70]);
 
-  let xScale = (_, prevOrCurrent) =>
-    d3
+
+  const xScale = (_, prevOrCurrent) => d3
       .scaleSequential()
       .domain(d3.extent(particles, (d) => d[prevOrCurrent]))
+      // .range([marginLeft + margin, width]);
       .range([marginLeft + margin, width]);
 
-  let r = (selectedValue) => rScale(selectedValue);
-
-  // Store and scale particles for animation
-  const dodgedParticlesOrigin = dodge(
-    particles,
-    prevDate,
-    props.valueSelection,
-    xScale(particles, prevDate),
-    r,
-    padding
-  );
-  const dodgedParticlesDestination = dodge(
-    particles,
-    props.dateSelection,
-    props.valueSelection,
-    xScale(particles, props.dateSelection),
-    r,
-    padding
-  );
+  const r = (selectedValue) => rScale(selectedValue);
 
   const tooltip =
     isBrowser() &&
-    d3
-      .select("#tooltipDiv")
-      .style("background-color", "white")
-      .style("border-radius", "2px")
-      .style(
-        "box-shadow",
-        "0 3px 6px rgba(0, 0, 0, 0.3), 0 3px 6px rgba(0, 0, 0, 0.4)"
-      )
+    d3.select("#tooltipDivLight")
       .style("opacity", 0)
-      .style("padding", "5px")
-      .style("z-index", 1000000);
+
 
   function showTooltip(
     tooltipX,
@@ -247,11 +65,11 @@ const ScrollySwarmDrawing = (
   ) {
     isBrowser() &&
       tooltip
-        .style("opacity", 0.7)
+        .style("opacity", 1)
         .style("display", "block")
         .style("top", tooltipY + "px")
         .style("left", tooltipX + 30 - margin + "px")
-        .style("z-index", 500000)
+        .style("z-index", 5000000)
         .html(
           `<div class ="swarmTooltipText">
           <div>words written: <b>${readableValue}</b></div>
@@ -261,8 +79,8 @@ const ScrollySwarmDrawing = (
         );
   }
 
-  const delaunay2 = (dateString, x, y) =>
-    Delaunay.from(dodgedParticlesDestination.map((d) => [d.x, d.y]));
+  // const delaunayPoints = (dateString, x, y) =>
+  //   Delaunay.from(dodgedParticlesDestination.map((d) => [d.x, d.y]));
 
   const xAxisScale = d3
     .scaleSequential()
@@ -275,20 +93,53 @@ const ScrollySwarmDrawing = (
     .tickFormat((d) => `${d}`);
 
   useEffect(() => {
+
     //************************************************************
     // ***** Scale Canvas and prep
     // ***********************************************************
-    const canvas = canvasMainRef.current;
+    const canvas = mainCanvasRef.current;
     const context = canvas.getContext("2d", { alpha: false });
+    const preRenderCanvas = preRenderCanvasRef.current
+    const preRenderContext = preRenderCanvas.getContext("2d");
+    preRenderContext.scale(pixelRatio, pixelRatio);
+    preRenderContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+
+
+
     context.scale(pixelRatio, pixelRatio);
     context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
     context.lineWidth = lineWidth;
     context.fillStyle = circleColor;
+    preRenderContext.fillStyle = circleColor;
     context.strokeStyle = strokeColor;
-    const renderRoughCircle = (cx, cy, diamater) =>
-      new RoughCanvas.RoughCanvas(canvas).circle(cx, cy, diamater, {
-        roughness: 0.5,
-      });
+    const renderRoughCircle = (cx, cy, diamater, canvasElem ) =>
+
+    new RoughCanvas.RoughCanvas(canvasElem).circle(cx, cy, diamater, {
+      roughness: 0.5, move: 0
+    });
+
+    const dodgedParticlesOrigin = dodge(
+      particles,
+      prevDate,
+      props.valueSelection,
+      xScale(particles, prevDate),
+      r,
+      padding,
+    );
+
+    const dodgedParticlesDestination = dodge(
+      particles,
+      props.dateSelection,
+      props.valueSelection,
+      xScale(particles, props.dateSelection),
+      r,
+      padding,
+    );
+
+    const delaunayPoints = (dateString, x, y) =>
+    Delaunay.from(dodgedParticlesDestination.map((d) => [d.x, d.y]));
+
+
     //************************************************************
     // ***** End Scale Canvas and prep
     // ***********************************************************
@@ -297,9 +148,7 @@ const ScrollySwarmDrawing = (
         gsap.fromTo(
           dodgedParticlesOrigin,
           {
-            x: (index) =>
-              dodgedParticlesOrigin[index].x &&
-              console.log("dopa", dodgedParticlesOrigin[index].x),
+            x: (index) => dodgedParticlesOrigin[index].x,
             y: (index) => dodgedParticlesOrigin[index].y,
           },
           {
@@ -310,27 +159,28 @@ const ScrollySwarmDrawing = (
             // Documentation: https://greensock.com/docs/v3/Staggers
             onUpdate: animate,
             lazy: true,
-            onInterrupt: "stop",
             stagger: {
               each: 0.001,
               from: "random",
             },
-          }
+
+          },
         );
 
       animation();
 
-      function animate(x, y) {
+
+
+
+      function animate() {
+        preRenderContext.clearRect(0, 0, width, height);
         context.clearRect(0, 0, width, height);
 
-        // Update xAxis on each animation change
         d3.select(axisRef.current).call(xAxis);
         dodgedParticlesOrigin.map(
+
           (d) => (
-            context.beginPath(),
-            renderRoughCircle(d.x - margin, height - d.y, d.r * 2),
-            context.fill()
-          )
+         renderRoughCircle(d.x - margin, height - d.y, d.r * 2, canvas)),
         );
       }
     };
@@ -340,19 +190,13 @@ const ScrollySwarmDrawing = (
     };
 
     const pointHoverIn = (hoverActive) => {
-      let xSelection = hoverActive.x - margin;
-      let ySelection = hoverActive.y;
-
-      d3.select(highlightRef.current)
-        .attr("r", hoverActive.r + 1)
-        .attr("cx", xSelection)
-        .attr("cy", height - ySelection)
-        .attr("fill", circleHighlightColor)
-        .attr("stroke", circleColor);
+      preRenderContext.clearRect(0, 0, width, height);
+      renderRoughCircle(hoverActive.x - margin, height - hoverActive.y, hoverActive.r * 2, preRenderCanvas)
+      preRenderContext.fill()
     };
 
     const pointHoverOut = () => {
-      d3.select(highlightRef.current).attr("r", 0);
+      preRenderContext.clearRect(0, 0, width, height);
     };
 
     function hideTooltip(hoverInactive) {
@@ -362,12 +206,12 @@ const ScrollySwarmDrawing = (
 
     onmousemove = (event) => {
       event.preventDefault();
-      const pageYoffset = window.pageYOffset;
+      let pageYoffset = window.pageYOffset;
       let mousePoint = d3.pointer(event, this);
       let xi = mousePoint[0] + margin;
       let y = height - mousePoint[1] + pageYoffset;
       let heightCond = xi < width + margin;
-      let index = delaunay2(props.dateSelection).find(xi, y);
+      let index = delaunayPoints(props.dateSelection).find(xi, y);
       let indexObj = dodgedParticlesDestination[index];
       let tooltipX = indexObj.x;
       let tooltipY = height - indexObj.y;
@@ -389,13 +233,12 @@ const ScrollySwarmDrawing = (
     };
 
     update();
-  }, [props.dateSelection, props.width, props.height, props.pixelRatio]);
+  }, [props.dateSelection, props.width, props.height]);
 
   return (
     <div className="canvasStickyChartContainer scrollySwarmContainerDrawing">
-      <div id="tooltipDiv" className="tooltipDiv" />
+      <div id="tooltipDivLight" className="tooltipDiv" />
       <svg className="canvasStickyPointHighlight" width={width} height={height}>
-        ={" "}
         {/* <ReactRough
           width={width}
           height={height}
@@ -408,7 +251,7 @@ const ScrollySwarmDrawing = (
             className="highlightCircle"
             ref={highlightRef}
           ></Circle>
-        </ReactRough>
+        </ReactRough> */}
       </svg>
       <canvas
         className={"canvasStickyChart"}
@@ -416,12 +259,22 @@ const ScrollySwarmDrawing = (
           width: props.width + "px",
           height: props.height + "px",
         }}
-        ref={canvasMainRef}
-        dimensions={props.dimensions}
+        ref={mainCanvasRef}
         width={props.width * props.pixelRatio}
         height={props.height * props.pixelRatio}
       />
-      // <canvas ref={glRef}></canvas>
+
+<canvas
+        className={"canvasStickyChart"}
+        style={{
+          width: props.width + "px",
+          height: props.height + "px",
+        }}
+        ref={preRenderCanvasRef}
+        width={props.width * props.pixelRatio}
+        height={props.height * props.pixelRatio}
+      />
+  {/* <canvas ref={glRef}></canvas> */}
       <svg style={{ top: props.height - 1 }} className="canvasStickyChartAxis">
         <g className="lightModeAxis" ref={axisRef}></g>
       </svg>
@@ -429,4 +282,4 @@ const ScrollySwarmDrawing = (
   );
 };
 
-export default ScrollySwarmDrawing; */
+export default ScrollySwarmDrawing;
