@@ -5,9 +5,10 @@ import { graphql } from "gatsby";
 import "../styles.css";
 import { unNestDiaryData } from "../consts/childhoodDiaryConsts";
 import { formatDataFunct } from "../utils/childhoodDiaryUtils";
-import BeeswarmSvg from "../components/BeeswarmSvg";
+import {SvgScrollBeeswarm} from "../components/BeeswarmSvg";
 
-const ChildhoodDiaryBinned = ({ data }) => {
+
+const ChildhoodDiarySwarmedSmooth = ({ data }) => {
   const [width, setWidth] = useState(10000);
   const [height, setHeight] = useState(10000);
   const margin = 0;
@@ -34,7 +35,7 @@ const ChildhoodDiaryBinned = ({ data }) => {
       ref={containerRef}
       style={{ border: "solid 2px white", width: "100%", height: "100vh" }}
     >
-      <BeeswarmSvg
+      <SvgScrollBeeswarm
         selectedDate="week"
         selectedValue="entry_word_count"
         data={formattedData}
@@ -50,7 +51,7 @@ const ChildhoodDiaryBinned = ({ data }) => {
 };
 
 export const query = graphql`
-  query ChildhoodDiaryBinnedQuery {
+  query ChildhoodDiarySwarmedSmoothQuery {
     allDataCsv {
       edges {
         node {
@@ -66,4 +67,4 @@ export const query = graphql`
   }
 `;
 
-export default ChildhoodDiaryBinned;
+export default ChildhoodDiarySwarmedSmooth;

@@ -64,7 +64,7 @@ export const formatDataFunct = (dataElem) => {
   const diaryFormattedData = [];
   dataElem.forEach((d) => {
     let dObject = {
-      id: d.id,
+      id: Math.random(),
       date: d.date,
       entry_word_count: d.entry_word_count,
       formatted_date: new Date(d.formatted_date),
