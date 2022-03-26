@@ -121,19 +121,23 @@ const ScrollySwarmDrawing = (
     context.strokeStyle = strokeColor;
     setCanvasState(canvas);
     console.log("BuildCanvas");
-  }, [mainCanvasRef]);
+  }, [mainCanvasRef, props.width, props.height]);
 
-  useMemo(() => {
-    if (!mainCanvasRef.current) {
+  ///Initial Load
+  useEffect(() => {
+    if (!canvasState.getContext | !interactionRef.current) {
       return;
     }
     const canvas = canvasState;
     const context = canvas.getContext("2d", { alpha: false });
     context.clearRect(0, 0, width, height);
+
+    //Initial Render will happen here - transition will need to happen elsewhere
     d3.select(axisRef.current).call(xAxis);
     dodgedParticlesDestination.map((d) =>
       renderRoughCircle(d.x - margin, height - d.y, d.r * 2, canvas)
     );
+    //
     const interactionCanvas = interactionRef.current;
     const interactionContext = interactionCanvas.getContext("2d");
     interactionContext.scale(pixelRatio, pixelRatio);
@@ -190,12 +194,60 @@ const ScrollySwarmDrawing = (
 
       heightCond ? pointHoverIn(indexObj) : pointHoverOut(indexObj);
     };
-  }, [props.dateSelection, props.width, props.height]);
+  }, [canvasState, props.dateSelection, props.width, props.height]);
+
+  //Update
+  useEffect(() => {
+    if (!canvasState.getContext) {
+      return;
+    }
+    const canvas = canvasState;
+    const context = canvas.getContext("2d", { alpha: false });
+    context.clearRect(0, 0, width, height);
+
+    //Initial Render will happen here - transition will need to happen elsewhere
+    d3.select(axisRef.current).call(xAxis);
+    dodgedParticlesDestination.map((d) =>
+      renderRoughCircle(d.x - margin, height - d.y, d.r * 2, canvas)
+    );
+  }, [props.dateSelection]);
+
+  const duration = 1500;
+  const ease = d3.easeCubic;
+
+  const timer = d3.timer((elapsed) => {
+    // compute how far through the animation we are (0 to 1)
+    const t = Math.min(1, ease(elapsed / duration));
+
+    // update point positions (interpolate between source and target)
+    // points.forEach(point => {
+    //   point.x = point.sx * (1 - t) + point.tx * t;
+    //   point.y = point.sy * (1 - t) + point.ty * t;
+    // });
+
+    // // update what is drawn on screen
+    // draw();
+
+    // if this animation is over
+    if (t === 1) {
+      // stop this timer since we are done animating.
+      timer.stop();
+    }
+  });
 
   return (
     <div className="canvasStickyChartContainer scrollySwarmContainerDrawing">
       <div id="tooltipDivLight" className="tooltipDiv" />
-
+      <canvas
+        className={"canvasStickyPointHighlight"}
+        style={{
+          width: props.width + "px",
+          height: props.height + "px",
+        }}
+        ref={interactionRef}
+        width={props.width * props.pixelRatio}
+        height={props.height * props.pixelRatio}
+      />
       <canvas
         className={"canvasStickyChart"}
         style={{
@@ -207,16 +259,6 @@ const ScrollySwarmDrawing = (
         height={props.height * props.pixelRatio}
       />
 
-      <canvas
-        className={"interactionCanvas"}
-        style={{
-          width: props.width + "px",
-          height: props.height + "px",
-        }}
-        ref={interactionRef}
-        width={props.width * props.pixelRatio}
-        height={props.height * props.pixelRatio}
-      />
       {/* <canvas ref={glRef}></canvas> */}
       <svg style={{ top: props.height - 1 }} className="canvasStickyChartAxis">
         <g className="lightModeAxis" ref={axisRef}></g>
