@@ -9,6 +9,7 @@ import { dodge, dodgeMap } from "../../utils/visualizationUtils";
 import * as RoughCanvas from "roughjs/bin/canvas";
 import { usePrevious } from "../../hooks/customHooks";
 import { RoughGenerator } from "roughjs/bin/generator";
+import { select } from "d3";
 
 // import * as RoughSvgfrom from "roughjs/bin/svg"
 
@@ -28,11 +29,13 @@ const ScrollySwarmDrawing = (
     padding = lineWidth,
   }
 ) => {
+  const [complete, setComplete] = useState(true);
   const prevDate = usePrevious(props.dateSelection, "");
+  const [interuptedDate, setInturptedDate] = useState(prevDate);
 
   const mainCanvasRef = useRef();
   const axisRef = useRef();
-  const interactionRef = useRef();
+  const preRenderCanvasRef = useRef();
 
   const rScale = d3
     .scaleLinear()
@@ -67,7 +70,10 @@ const ScrollySwarmDrawing = (
         .html(
           `<div class ="swarmTooltipText">
           <div>words written: <b>${readableValue}</b></div>
-          <div>${props.dateSelection}: <b>${readableDate}</b></div>
+          <div>${props.dateSelection}: <b>${formatTics(
+            props.dateSelection,
+            readableDate
+          )}</b></div>
           <div><b>${readableFullDate}</b></div>
           </div>`
         );
@@ -81,14 +87,89 @@ const ScrollySwarmDrawing = (
     .domain(d3.extent(particles, (d) => d[props.dateSelection]))
     .range([marginLeft, width - margin]);
 
+  const formatWeek = (d) => {
+    if (d === 0) {
+      return "Sun";
+    }
+    if (d === 1) {
+      return "Mon";
+    }
+    if (d === 2) {
+      return "Tues";
+    }
+    if (d === 3) {
+      return "Wed";
+    }
+    if (d === 4) {
+      return "Thurs";
+    }
+    if (d === 5) {
+      return "Fri";
+    }
+    if (d === 6) {
+      return "Sat";
+    }
+    return d;
+  };
+
+  const formatMonth = (d) => {
+    if (d === 0) {
+      return "Jan";
+    }
+    if (d === 2) {
+      return "Feb";
+    }
+    if (d === 3) {
+      return "Mar";
+    }
+    if (d === 4) {
+      return "Apr";
+    }
+    if (d === 5) {
+      return "May";
+    }
+    if (d === 6) {
+      return "Jun";
+    }
+    if (d === 7) {
+      return "Jul";
+    }
+    if (d === 8) {
+      return "Aug";
+    }
+    if (d === 9) {
+      return "Sept";
+    }
+    if (d === 10) {
+      return "Oct";
+    }
+    if (d === 11) {
+      return "Nov";
+    }
+    if (d === 12) {
+      return "Dec";
+    }
+    return d;
+  };
+
+  function formatTics(selectedTime, d) {
+    if (selectedTime === "week") {
+      return formatWeek(d);
+    }
+    if (selectedTime === "month") {
+      return formatMonth(d);
+    }
+    return d;
+  }
+
   const xAxis = d3
     .axisBottom(xAxisScale)
     .ticks(5)
-    .tickFormat((d) => `${d}`);
+    .tickFormat((d) => `${formatTics(props.dateSelection, d)}`);
 
   const dodgedParticlesOrigin = dodge(
     particles,
-    prevDate || "year",
+    prevDate,
     props.valueSelection,
     xScale(particles, prevDate || "year"),
     r,
@@ -105,6 +186,46 @@ const ScrollySwarmDrawing = (
   );
 
   const [canvasState, setCanvasState] = useState(mainCanvasRef);
+  const originRef = useRef(dodgedParticlesOrigin);
+  const destinationRef = useRef(dodgedParticlesDestination);
+
+  function animatePoints(currentCanvas) {
+    if (!mainCanvasRef.current || !originRef.current) {
+      return;
+    }
+    const canvas = canvasState;
+    const context = canvas.getContext("2d", { alpha: false });
+    const animation = GSAPanimation(
+      originRef.current,
+      dodgedParticlesDestination,
+      animate,
+      1,
+      0.001,
+      "elastic.inOut(1, .5)",
+      onComplete,
+      onInterupt
+    );
+
+    function onComplete() {
+      // animation.play();
+      // console.log("Complete", animation._start, animation._end);
+      // // console.log(gsap.globalTimeline.seek(0).invalidate());
+    }
+
+    function onInterupt(elem) {
+      console.log(elem);
+      console.log("interrupt");
+      console.log(this);
+      this._ease("elastic.inOut(.4, .4)");
+    }
+    function animate() {
+      context.clearRect(0, 0, width, height);
+      d3.select(axisRef.current).call(xAxis);
+      originRef.current.map((d) =>
+        renderRoughCircle(d.x - margin, height - d.y, d.r * 2, canvas)
+      );
+    }
+  }
 
   useEffect(() => {
     if (!mainCanvasRef.current) {
@@ -120,46 +241,42 @@ const ScrollySwarmDrawing = (
     context.fillStyle = circleColor;
     context.strokeStyle = strokeColor;
     setCanvasState(canvas);
-    console.log("BuildCanvas");
   }, [mainCanvasRef, props.width, props.height]);
 
-  ///Initial Load
-  useEffect(() => {
-    if (!canvasState.getContext | !interactionRef.current) {
+  if (canvasState.getContext) {
+    animatePoints(canvasState);
+  }
+
+  useMemo(() => {
+    if (!canvasState.getContext) {
       return;
     }
     const canvas = canvasState;
-    const context = canvas.getContext("2d", { alpha: false });
-    context.clearRect(0, 0, width, height);
+    // animatePoints(canvas);
 
-    //Initial Render will happen here - transition will need to happen elsewhere
-    d3.select(axisRef.current).call(xAxis);
-    dodgedParticlesDestination.map((d) =>
-      renderRoughCircle(d.x - margin, height - d.y, d.r * 2, canvas)
-    );
-    //
-    const interactionCanvas = interactionRef.current;
-    const interactionContext = interactionCanvas.getContext("2d");
-    interactionContext.scale(pixelRatio, pixelRatio);
-    interactionContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-    interactionContext.fillStyle = circleColor;
+    const preRenderCanvas = preRenderCanvasRef.current;
+    const preRenderContext = preRenderCanvas.getContext("2d");
+    preRenderContext.scale(pixelRatio, pixelRatio);
+    preRenderContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+    preRenderContext.fillStyle = circleColor;
     const delaunayPoints = () =>
       Delaunay.from(dodgedParticlesDestination.map((d) => [d.x, d.y]));
+
     onscroll = () => {
       pointHoverOut();
     };
     const pointHoverIn = (hoverActive) => {
-      interactionContext.clearRect(0, 0, width, height);
+      preRenderContext.clearRect(0, 0, width, height);
       renderRoughCircle(
         hoverActive.x - margin,
         height - hoverActive.y,
         hoverActive.r * 2,
-        interactionCanvas
+        preRenderCanvas
       );
-      interactionContext.fill();
+      preRenderContext.fill();
     };
     const pointHoverOut = () => {
-      interactionContext.clearRect(0, 0, width, height);
+      preRenderContext.clearRect(0, 0, width, height);
     };
 
     function hideTooltip(hoverInactive) {
@@ -194,60 +311,16 @@ const ScrollySwarmDrawing = (
 
       heightCond ? pointHoverIn(indexObj) : pointHoverOut(indexObj);
     };
-  }, [canvasState, props.dateSelection, props.width, props.height]);
-
-  //Update
-  useEffect(() => {
-    if (!canvasState.getContext) {
-      return;
-    }
-    const canvas = canvasState;
-    const context = canvas.getContext("2d", { alpha: false });
-    context.clearRect(0, 0, width, height);
-
-    //Initial Render will happen here - transition will need to happen elsewhere
-    d3.select(axisRef.current).call(xAxis);
-    dodgedParticlesDestination.map((d) =>
-      renderRoughCircle(d.x - margin, height - d.y, d.r * 2, canvas)
-    );
-  }, [props.dateSelection]);
-
-  const duration = 1500;
-  const ease = d3.easeCubic;
-
-  const timer = d3.timer((elapsed) => {
-    // compute how far through the animation we are (0 to 1)
-    const t = Math.min(1, ease(elapsed / duration));
-
-    // update point positions (interpolate between source and target)
-    // points.forEach(point => {
-    //   point.x = point.sx * (1 - t) + point.tx * t;
-    //   point.y = point.sy * (1 - t) + point.ty * t;
-    // });
-
-    // // update what is drawn on screen
-    // draw();
-
-    // if this animation is over
-    if (t === 1) {
-      // stop this timer since we are done animating.
-      timer.stop();
-    }
-  });
+  }, [originRef, destinationRef, props.dateSelection, height, width]);
 
   return (
     <div className="canvasStickyChartContainer scrollySwarmContainerDrawing">
       <div id="tooltipDivLight" className="tooltipDiv" />
-      <canvas
-        className={"canvasStickyPointHighlight"}
-        style={{
-          width: props.width + "px",
-          height: props.height + "px",
-        }}
-        ref={interactionRef}
-        width={props.width * props.pixelRatio}
-        height={props.height * props.pixelRatio}
-      />
+      <svg
+        className="canvasStickyPointHighlight"
+        width={width}
+        height={height}
+      ></svg>
       <canvas
         className={"canvasStickyChart"}
         style={{
@@ -259,9 +332,19 @@ const ScrollySwarmDrawing = (
         height={props.height * props.pixelRatio}
       />
 
+      <canvas
+        className={"canvasStickyChart"}
+        style={{
+          width: props.width + "px",
+          height: props.height + "px",
+        }}
+        ref={preRenderCanvasRef}
+        width={props.width * props.pixelRatio}
+        height={props.height * props.pixelRatio}
+      />
       {/* <canvas ref={glRef}></canvas> */}
       <svg style={{ top: props.height - 1 }} className="canvasStickyChartAxis">
-        <g className="lightModeAxis" ref={axisRef}></g>
+        <g className="font-sans text-lg" ref={axisRef}></g>
       </svg>
     </div>
   );
@@ -269,8 +352,47 @@ const ScrollySwarmDrawing = (
 
 export default ScrollySwarmDrawing;
 
+export const GSAPanimation = (
+  originData,
+  destinationData,
+  onUpdate,
+  animationDuration,
+  stagger,
+  ease,
+  onComplete,
+  onInterrupt
+) =>
+  gsap.fromTo(
+    originData,
+    {
+      x: (index) => originData[index].x,
+      y: (index) => originData[index].y,
+    },
+    {
+      x: (index) => destinationData[index].x,
+      y: (index) => destinationData[index].y,
+      ease: ease,
+      duration: animationDuration,
+      // Documentation: https://greensock.com/docs/v3/Staggers
+      onUpdate: onUpdate,
+      data: originData,
+      lazy: true,
+      overwrite: true,
+      onComplete: onComplete,
+      startAt: { x: -100, opacity: 0 },
+      onInterrupt: onInterrupt,
+      // autoRemoveChildren: true,
+      stagger: {
+        each: stagger,
+        from: "random",
+      },
+    }
+  );
+
 export const renderRoughCircle = (cx, cy, diamater, canvasElem) =>
   new RoughCanvas.RoughCanvas(canvasElem).circle(cx, cy, diamater, {
-    roughness: 1,
+    roughness: 0.5,
     move: 0,
   });
+
+console.log("ROUGH", RoughGenerator, renderRoughCircle);

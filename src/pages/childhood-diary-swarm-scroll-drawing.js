@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, createRef, useState } from "react";
-import {ScrollSwarmDrawing} from "../components/ScrollySwarm";
+import { ScrollSwarmDrawing } from "../components/ScrollySwarm";
 import { useScrollData } from "scroll-data-hook";
 import debounce from "debounce";
 import { Link } from "gatsby";
@@ -37,18 +37,17 @@ const ScrollSwarmPageDrawing = ({ data }) => {
   };
 
   const generateOffset = (stepdata, index) => {
-    console.log("OFFSET", stepdata)
-    return 1
+    console.log("OFFSET", stepdata);
+    return 1;
   };
 
-
-  function onStepProgress  (data, index)  {
-    console.log("STEPDATA", data)
+  function onStepProgress(data, index) {
+    console.log("STEPDATA", data);
     // window.scrollTo({
     //   top: stepdata.element.offsetTop - currentHeight/2,
     //   behavior: 'smooth'
     // });
-  };
+  }
 
   const scrollOrder = ["year", "month", "week"];
 
@@ -57,13 +56,11 @@ const ScrollSwarmPageDrawing = ({ data }) => {
   const stepRefs = useRef([]);
 
   // console.log(Object.keys(stepRefs).length != scrollOrder.length)
-    stepRefs.current = scrollOrder.map((element, i) => (stepRefs.current[i] ?? createRef()));
-
-
+  stepRefs.current = scrollOrder.map(
+    (element, i) => stepRefs.current[i] ?? createRef()
+  );
 
   React.useEffect(() => {
-
-
     if (isBrowser()) {
       setCurrentWidth(window.innerWidth);
       setCurrentHeight(window.innerHeight);
@@ -76,21 +73,17 @@ const ScrollSwarmPageDrawing = ({ data }) => {
     }
   }, [currentWidth, pixelRatio]);
 
-
-
   if (isBrowser() === false) {
     return <></>;
   }
 
-
   return (
-    <div className="scrollySwarmContainerDrawing">
+    <div className="">
       <div>
-
         <ScrollSwarmDrawing
-          className={"staticGraphicContainer scrollySwarmContainerDrawing"}
-          height={currentHeight * 0.95}
-          width={currentWidth * 0.6}
+          className={"left-0"}
+          height={currentHeight * 0.9}
+          width={currentWidth * 0.9}
           particles={formatDataFunct(diaryRawData)}
           useScrollData={useScrollData}
           dateSelection={
@@ -98,31 +91,42 @@ const ScrollSwarmPageDrawing = ({ data }) => {
           }
           valueSelection="entry_word_count"
           stepIndex={currentSelectedTime}
-          margin={45}
+          margin={currentWidth * 0.2}
           marginLeft={currentWidth * 0.1}
-          marginTop={currentHeight * 0.7}
+          marginTop={currentHeight * 0.1}
           pixelRatio={pixelRatio}
         />
-        <div className="scrollingTextContainer darkModeScrollingTitle">
-        {/* {scrollOrder.map((selectedTime, i) => (
+        <div className="w-1/4 float-right">
+          {/* {scrollOrder.map((selectedTime, i) => (
             <div ref={stepRefs.current[i]}></div>
           ))} */}
-          <Scrollama threshold={1} offset={.5} onStepEnter={onStepEnter} debug={false}>
-
-          {scrollOrder.map((selectedTime, i) => (
+          <Scrollama
+            threshold={1}
+            offset={0.5}
+            onStepEnter={onStepEnter}
+            debug={false}
+          >
+            {scrollOrder.map((selectedTime, i) => (
               <Step data={selectedTime}>
                 <div
                   key={i}
                   ref={stepRefs.current[i]}
                   style={{
-                    opacity: currentSelectedTime === selectedTime ? 1 : .5,
+                    opacity: currentSelectedTime === selectedTime ? 1 : 0.5,
                   }}
                   class="textStep scrollySwarmTextStep"
                 >
-                  <div id={currentSelectedTime + i}    style={{
-                    opacity: currentSelectedTime === selectedTime ? 1 : 1,
-                  }} className="scrollToSelection" ref={stepRefs.current[i]}> {scatterScrollingtextSwarm(selectedTime).title}</div>
-
+                  <div
+                    id={currentSelectedTime + i}
+                    style={{
+                      opacity: currentSelectedTime === selectedTime ? 1 : 1,
+                    }}
+                    className="scrollToSelection"
+                    ref={stepRefs.current[i]}
+                  >
+                    {" "}
+                    {scatterScrollingtextSwarm(selectedTime).title}
+                  </div>
                 </div>
               </Step>
             ))}
