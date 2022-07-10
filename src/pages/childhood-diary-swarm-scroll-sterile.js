@@ -1,9 +1,9 @@
 import React, { useRef, createRef, useState } from "react";
-import {ScrollSwarmSterile} from "../components/ScrollySwarm";
+import { ScrollSwarmSterile } from "../components/ScrollySwarm";
 import { useScrollData } from "scroll-data-hook";
 import debounce from "debounce";
-import { Link } from "gatsby"
-import { useScrollRestoration } from "gatsby"
+import { Link } from "gatsby";
+import { useScrollRestoration } from "gatsby";
 import { Scrollama, Step } from "react-scrollama";
 import { graphql } from "gatsby";
 import "../styles.css";
@@ -15,11 +15,21 @@ import { formatDataFunct } from "../utils/childhoodDiaryUtils";
 const ScrollySwarmPage = ({ data }) => {
   const diaryRawData = data.allDataCsv.edges[0].node.items;
 
-
-  const scrollOrder = ["year", "month", "week","year", "year", "month", "week", "year"]
+  const scrollOrder = [
+    "year",
+    "month",
+    "week",
+    "year",
+    "year",
+    "month",
+    "week",
+    "year",
+  ];
 
   const stepRefs = useRef([]);
-  stepRefs.current = scrollOrder.map((element, i) => stepRefs.current[i] ?? createRef(element));
+  stepRefs.current = scrollOrder.map(
+    (element, i) => stepRefs.current[i] ?? createRef(element)
+  );
   function handleBackClick() {
     stepRefs.current.scrollIntoView({ behavior: "smooth" });
   }
@@ -80,7 +90,9 @@ const ScrollySwarmPage = ({ data }) => {
           <Scrollama offset={0.5} onStepEnter={onStepEnter} debug={false}>
             {scrollOrder.map((selectedTime, index) => (
               <Step data={selectedTime}>
-                <div ref={stepRefs.current[index]} id={selectedTime}
+                <div
+                  ref={stepRefs.current[index]}
+                  id={selectedTime}
                   style={{
                     opacity: currentSelectedTime === selectedTime ? 1 : 0.2,
                   }}
