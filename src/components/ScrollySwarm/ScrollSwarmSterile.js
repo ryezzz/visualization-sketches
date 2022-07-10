@@ -18,13 +18,13 @@ const ScrollySwarmSterile = (props) => {
   let ref = useRef();
   let highlightRef = useRef();
   let axisRef = useRef();
-  let circleColor = "rgba(0,0,255,.7)"
-  let circleHighlightColor = "rgb(255,255,255)"
-  let strokeColor = "rgba(0,0,0,0)"
-  let globalOpacity = 1
-  let animationDuration = 1
+  let circleColor = "rgba(0,0,255,.7)";
+  let circleHighlightColor = "rgb(255,255,255)";
+  let strokeColor = "rgba(0,0,0,0)";
+  let globalOpacity = 1;
+  let animationDuration = 1;
   let lineWidth = 1.4;
-  let padding = lineWidth
+  let padding = lineWidth;
 
   ////MOVE TO HOOKS
   const usePrevious = (value, defaultRef) => {
@@ -199,7 +199,6 @@ const ScrollySwarmSterile = (props) => {
         .attr("cy", height - ySelection)
         .attr("fill", circleHighlightColor)
         .attr("stroke", circleColor);
-
     };
 
     const pointHoverOut = () => {

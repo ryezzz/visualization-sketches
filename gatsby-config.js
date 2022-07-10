@@ -47,6 +47,12 @@ module.exports = {
         nodePerFile: true,
       },
     },
+    {
+      resolve: `gatsby-plugin-polyfill-io`,
+      options: {
+        features: [`Array.prototype.map`, `fetch`, `Promise`, `es5`, `es6`],
+      },
+    },
   ],
 };
 

@@ -9,7 +9,8 @@ import { dodge, dodgeMap } from "../../utils/visualizationUtils";
 import * as RoughCanvas from "roughjs/bin/canvas";
 import { usePrevious } from "../../hooks/customHooks";
 import { RoughGenerator } from "roughjs/bin/generator";
-import { select } from "d3";
+// import { select } from "d3";
+// import { withTheme } from "styled-components";
 
 // import * as RoughSvgfrom from "roughjs/bin/svg"
 
@@ -24,18 +25,15 @@ const ScrollySwarmDrawing = (
     marginLeft = props.marginLeft,
     circleColor = "rgba(0,0,255,.3)",
     strokeColor = "rgba(0,0,255,1)",
-    animationDuration = 0.5,
+    animationDuration = 2,
     lineWidth = 0,
     padding = lineWidth,
   }
 ) => {
-  const [complete, setComplete] = useState(true);
-  const prevDate = usePrevious(props.dateSelection, "");
-  const [interuptedDate, setInturptedDate] = useState(prevDate);
-
+  const prevDate = usePrevious(props.dateSelection, "year");
   const mainCanvasRef = useRef();
   const axisRef = useRef();
-  const preRenderCanvasRef = useRef();
+  const interactiveCanvasRef = useRef();
 
   const rScale = d3
     .scaleLinear()
@@ -87,81 +85,6 @@ const ScrollySwarmDrawing = (
     .domain(d3.extent(particles, (d) => d[props.dateSelection]))
     .range([marginLeft, width - margin]);
 
-  const formatWeek = (d) => {
-    if (d === 0) {
-      return "Sun";
-    }
-    if (d === 1) {
-      return "Mon";
-    }
-    if (d === 2) {
-      return "Tues";
-    }
-    if (d === 3) {
-      return "Wed";
-    }
-    if (d === 4) {
-      return "Thurs";
-    }
-    if (d === 5) {
-      return "Fri";
-    }
-    if (d === 6) {
-      return "Sat";
-    }
-    return d;
-  };
-
-  const formatMonth = (d) => {
-    if (d === 0) {
-      return "Jan";
-    }
-    if (d === 2) {
-      return "Feb";
-    }
-    if (d === 3) {
-      return "Mar";
-    }
-    if (d === 4) {
-      return "Apr";
-    }
-    if (d === 5) {
-      return "May";
-    }
-    if (d === 6) {
-      return "Jun";
-    }
-    if (d === 7) {
-      return "Jul";
-    }
-    if (d === 8) {
-      return "Aug";
-    }
-    if (d === 9) {
-      return "Sept";
-    }
-    if (d === 10) {
-      return "Oct";
-    }
-    if (d === 11) {
-      return "Nov";
-    }
-    if (d === 12) {
-      return "Dec";
-    }
-    return d;
-  };
-
-  function formatTics(selectedTime, d) {
-    if (selectedTime === "week") {
-      return formatWeek(d);
-    }
-    if (selectedTime === "month") {
-      return formatMonth(d);
-    }
-    return d;
-  }
-
   const xAxis = d3
     .axisBottom(xAxisScale)
     .ticks(5)
@@ -185,11 +108,13 @@ const ScrollySwarmDrawing = (
     padding
   );
 
+  const generateDelaunay = (pointData) =>
+    Delaunay.from(pointData.map((d) => [d.x, d.y]));
+
   const [canvasState, setCanvasState] = useState(mainCanvasRef);
   const originRef = useRef(dodgedParticlesOrigin);
-  const destinationRef = useRef(dodgedParticlesDestination);
 
-  function animatePoints(currentCanvas) {
+  function animatePoints() {
     if (!mainCanvasRef.current || !originRef.current) {
       return;
     }
@@ -199,41 +124,58 @@ const ScrollySwarmDrawing = (
       originRef.current,
       dodgedParticlesDestination,
       animate,
-      1,
+      animationDuration,
       0.001,
-      "elastic.inOut(1, .5)",
+      `elastic.inOut(.3, .3)`,
       onComplete,
-      onInterupt
+      onInterupt,
+      prevDate
     );
 
     function onComplete() {
-      // animation.play();
+      // for debugging
       // console.log("Complete", animation._start, animation._end);
-      // // console.log(gsap.globalTimeline.seek(0).invalidate());
+      // console.log(gsap.globalTimeline.seek(0).invalidate());
     }
 
-    function onInterupt(elem) {
-      console.log(elem);
-      console.log("interrupt");
-      console.log(this);
-      this._ease("elastic.inOut(.4, .4)");
+    function onInterupt() {
+      // for debugging
+      // console.log("interrupt");
+      // console.log(this);
+      // this._ease("elastic.inOut(.4, .4)");
     }
+
     function animate() {
       context.clearRect(0, 0, width, height);
       d3.select(axisRef.current).call(xAxis);
-      originRef.current.map((d) =>
-        renderRoughCircle(d.x - margin, height - d.y, d.r * 2, canvas)
-      );
+
+      originRef.current.map((d, i) => {
+        // let variedStroke = d.r > 10 ? d.r / 10 : d.r > 7 ? d.r / 10 : d.r / 5;
+        let variedStroke = 1.5;
+
+        context.beginPath();
+        context.arc(d.x - margin, height - d.y, d.r - 1, 0, 2 * Math.PI);
+        // context.stroke();
+        context.fill();
+        renderRoughCircle(
+          d.x - margin,
+          height - d.y,
+          d.r * 1.9,
+          canvas,
+          variedStroke
+        );
+      });
     }
   }
 
+  // Create Canvas
   useEffect(() => {
     if (!mainCanvasRef.current) {
       return;
     }
 
     const canvas = mainCanvasRef.current;
-    const context = canvas.getContext("2d", { alpha: false });
+    const context = canvas.getContext("2d", { alpha: true });
 
     context.scale(pixelRatio, pixelRatio);
     context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
@@ -247,36 +189,39 @@ const ScrollySwarmDrawing = (
     animatePoints(canvasState);
   }
 
+  //Make interactive
   useMemo(() => {
-    if (!canvasState.getContext) {
+    if (!interactiveCanvasRef.current) {
       return;
     }
-    const canvas = canvasState;
-    // animatePoints(canvas);
 
-    const preRenderCanvas = preRenderCanvasRef.current;
-    const preRenderContext = preRenderCanvas.getContext("2d");
-    preRenderContext.scale(pixelRatio, pixelRatio);
-    preRenderContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-    preRenderContext.fillStyle = circleColor;
-    const delaunayPoints = () =>
-      Delaunay.from(dodgedParticlesDestination.map((d) => [d.x, d.y]));
+    const interactiveCanvas = interactiveCanvasRef.current;
+    const interactiveContext = interactiveCanvas.getContext("2d");
+
+    interactiveContext.scale(pixelRatio, pixelRatio);
+    interactiveContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+    interactiveContext.fillStyle = circleColor;
+
+    const delaunayPoints = () => generateDelaunay(dodgedParticlesDestination);
 
     onscroll = () => {
       pointHoverOut();
     };
+
     const pointHoverIn = (hoverActive) => {
-      preRenderContext.clearRect(0, 0, width, height);
+      interactiveContext.clearRect(0, 0, width, height);
+      interactiveContext.fillStyle = "black";
+
       renderRoughCircle(
         hoverActive.x - margin,
         height - hoverActive.y,
         hoverActive.r * 2,
-        preRenderCanvas
+        interactiveCanvas
       );
-      preRenderContext.fill();
+      interactiveContext.fill();
     };
     const pointHoverOut = () => {
-      preRenderContext.clearRect(0, 0, width, height);
+      interactiveContext.clearRect(0, 0, width, height);
     };
 
     function hideTooltip(hoverInactive) {
@@ -311,7 +256,7 @@ const ScrollySwarmDrawing = (
 
       heightCond ? pointHoverIn(indexObj) : pointHoverOut(indexObj);
     };
-  }, [originRef, destinationRef, props.dateSelection, height, width]);
+  }, [interactiveCanvasRef, props.dateSelection, height, width]);
 
   return (
     <div className="canvasStickyChartContainer scrollySwarmContainerDrawing">
@@ -338,7 +283,7 @@ const ScrollySwarmDrawing = (
           width: props.width + "px",
           height: props.height + "px",
         }}
-        ref={preRenderCanvasRef}
+        ref={interactiveCanvasRef}
         width={props.width * props.pixelRatio}
         height={props.height * props.pixelRatio}
       />
@@ -360,39 +305,117 @@ export const GSAPanimation = (
   stagger,
   ease,
   onComplete,
-  onInterrupt
+  onInterrupt,
+  isDateNotNull
 ) =>
   gsap.fromTo(
     originData,
     {
-      x: (index) => originData[index].x,
-      y: (index) => originData[index].y,
+      x: (index) => (isDateNotNull ? originData[index].x : 500),
+      y: (index) => (isDateNotNull ? originData[index].y : -30),
     },
     {
       x: (index) => destinationData[index].x,
       y: (index) => destinationData[index].y,
-      ease: ease,
+      ease: isDateNotNull ? ease : "elastic.out",
       duration: animationDuration,
       // Documentation: https://greensock.com/docs/v3/Staggers
       onUpdate: onUpdate,
       data: originData,
-      lazy: true,
+      lazy: false,
       overwrite: true,
       onComplete: onComplete,
-      startAt: { x: -100, opacity: 0 },
+      // startAt: { x: -100, opacity: 0 },
       onInterrupt: onInterrupt,
       // autoRemoveChildren: true,
       stagger: {
         each: stagger,
-        from: "random",
+        from: isDateNotNull ? "random" : "random",
       },
     }
   );
 
-export const renderRoughCircle = (cx, cy, diamater, canvasElem) =>
+export const renderRoughCircle = (cx, cy, diamater, canvasElem, strokeWidth) =>
   new RoughCanvas.RoughCanvas(canvasElem).circle(cx, cy, diamater, {
-    roughness: 0.5,
+    roughness: 0.2,
     move: 0,
+    stroke: "#303030",
+    strokeWidth: strokeWidth,
   });
 
 console.log("ROUGH", RoughGenerator, renderRoughCircle);
+
+export const formatWeek = (d) => {
+  if (d === 0) {
+    return "Sun";
+  }
+  if (d === 1) {
+    return "Mon";
+  }
+  if (d === 2) {
+    return "Tues";
+  }
+  if (d === 3) {
+    return "Wed";
+  }
+  if (d === 4) {
+    return "Thurs";
+  }
+  if (d === 5) {
+    return "Fri";
+  }
+  if (d === 6) {
+    return "Sat";
+  }
+  return d;
+};
+
+export const formatMonth = (d) => {
+  if (d === 0) {
+    return "Jan";
+  }
+  if (d === 2) {
+    return "Feb";
+  }
+  if (d === 3) {
+    return "Mar";
+  }
+  if (d === 4) {
+    return "Apr";
+  }
+  if (d === 5) {
+    return "May";
+  }
+  if (d === 6) {
+    return "Jun";
+  }
+  if (d === 7) {
+    return "Jul";
+  }
+  if (d === 8) {
+    return "Aug";
+  }
+  if (d === 9) {
+    return "Sept";
+  }
+  if (d === 10) {
+    return "Oct";
+  }
+  if (d === 11) {
+    return "Nov";
+  }
+  if (d === 12) {
+    return "Dec";
+  }
+  return d;
+};
+
+export function formatTics(selectedTime, d) {
+  if (selectedTime === "week") {
+    return formatWeek(d);
+  }
+  if (selectedTime === "month") {
+    return formatMonth(d);
+  }
+  return d;
+}

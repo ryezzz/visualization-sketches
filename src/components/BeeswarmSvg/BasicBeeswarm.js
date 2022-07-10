@@ -1,24 +1,23 @@
 import * as d3 from "d3";
-import React, {useRef} from "react";
+import React, { useRef } from "react";
 import { dodge } from "../../utils/visualizationUtils";
 import * as rough from "roughjs/bin/svg";
 
-
-const BasicBeeswarm = (props,
+const BasicBeeswarm = (
+  props,
   {
-  data = props.data,
-  selectedDate = props.selectedDate,
-  selectedValue = props.selectedValue,
-  height = props.height,
-  width = props.width,
-  marginLeft = props.margin,
-  marginBottom = props.marginTop,
-  marginRight = props.marginRight,
-  padding = 0
-}
+    data = props.data,
+    selectedDate = props.selectedDate,
+    selectedValue = props.selectedValue,
+    height = props.height,
+    width = props.width,
+    marginLeft = props.margin,
+    marginBottom = props.marginTop,
+    marginRight = props.marginRight,
+    padding = 0,
+  }
 ) => {
-
-  let svgRef = useRef()
+  let svgRef = useRef();
 
   let rScale = d3
     .scaleLinear()
@@ -34,10 +33,12 @@ const BasicBeeswarm = (props,
 
   let roughSvg = rough.svg(svgRef);
 
-
   return (
     <div>
-      <svg ref={svgRef} style={{ border: "solid 2px white", width: width, height: height }}>
+      <svg
+        ref={svgRef}
+        style={{ border: "solid 2px white", width: width, height: height }}
+      >
         <g width={width} height={height} transform={`translate(${10},${10})`}>
           {dodge(data, props.selectedDate, props.selectedValue, x, r, 0).map(
             (d, i) => (
